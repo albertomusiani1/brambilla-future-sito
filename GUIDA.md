@@ -10,6 +10,12 @@ Si legge dall'inizio alla fine la prima volta. Dopo si usa come manuale: la
 [ricette pratiche](#6-ricette-le-modifiche-più-comuni) sono le sezioni a cui
 tornerai.
 
+Gli ultimi capitoli cambiano registro: non spiegano più come è fatto *questo*
+sito, ma gli strumenti che ci stanno sotto — [Git e GitHub](#8-git-e-github-la-macchina-del-tempo-del-progetto),
+[Netlify](#9-netlify-chi-tiene-acceso-il-sito) — con le alternative possibili e
+i casi in cui converrebbe sceglierle, e come ci si organizza
+[per farne più d'uno](#17-da-un-sito-a-venti-fare-siti-per-più-clienti).
+
 ---
 
 ## Indice
@@ -21,13 +27,16 @@ tornerai.
 5. [La mappa del progetto](#5-la-mappa-del-progetto)
 6. [Ricette: le modifiche più comuni](#6-ricette-le-modifiche-più-comuni)
 7. [Dal tuo computer al visitatore: il giro completo](#7-dal-tuo-computer-al-visitatore-il-giro-completo)
-8. [Il modulo contatti: dove il sito smette di essere statico](#8-il-modulo-contatti-dove-il-sito-smette-di-essere-statico)
-9. [Farsi trovare: come funziona davvero il SEO](#9-farsi-trovare-come-funziona-davvero-il-seo)
-10. [Accessibilità: non è beneficenza](#10-accessibilità-non-è-beneficenza)
-11. [Le verifiche automatiche e perché esistono](#11-le-verifiche-automatiche-e-perché-esistono)
-12. [Glossario](#12-glossario)
-13. [Cosa imparare dopo](#13-cosa-imparare-dopo)
-14. [Rifarlo per un cliente](#14-rifarlo-per-un-cliente)
+8. [Git e GitHub: la macchina del tempo del progetto](#8-git-e-github-la-macchina-del-tempo-del-progetto)
+9. [Netlify: chi tiene acceso il sito](#9-netlify-chi-tiene-acceso-il-sito)
+10. [Il modulo contatti: dove il sito smette di essere statico](#10-il-modulo-contatti-dove-il-sito-smette-di-essere-statico)
+11. [Farsi trovare: come funziona davvero il SEO](#11-farsi-trovare-come-funziona-davvero-il-seo)
+12. [Accessibilità: non è beneficenza](#12-accessibilità-non-è-beneficenza)
+13. [Le verifiche automatiche e perché esistono](#13-le-verifiche-automatiche-e-perché-esistono)
+14. [Glossario](#14-glossario)
+15. [Cosa imparare dopo](#15-cosa-imparare-dopo)
+16. [Rifarlo per un cliente](#16-rifarlo-per-un-cliente)
+17. [Da un sito a venti: fare siti per più clienti](#17-da-un-sito-a-venti-fare-siti-per-più-clienti)
 
 ---
 
@@ -425,8 +434,9 @@ browser sul tuo computer. Nessun altro li vede.
 in fila con le precedenti, con una descrizione: si chiama **commit**. Puoi
 tornare a qualsiasi fotografia passata.
 
-Non è un backup: è la storia di *perché* le cose sono come sono. Il tuo progetto
-ha tre commit, e ognuno spiega cosa cambia e per quale motivo.
+Non è un backup: è la storia di *perché* le cose sono come sono. Ogni commit
+del tuo progetto spiega cosa cambia e per quale motivo. Il **capitolo 8** entra
+nel dettaglio.
 
 ### 3. Condividi — GitHub
 
@@ -435,7 +445,8 @@ fuori dal tuo computer, quindi sopravvive se il portatile cade. Con `git push`
 mandi lì i tuoi commit.
 
 Git e GitHub sono cose diverse: Git è il programma sul tuo computer, GitHub è il
-posto dove lo si tiene in comune. Come «PDF» e «Dropbox».
+posto dove lo si tiene in comune. Come «PDF» e «Dropbox». Il **capitolo 8** lo
+spiega per esteso, con le alternative.
 
 ### 4. Pubblichi — Netlify
 
@@ -458,6 +469,10 @@ rotto per sbaglio.
 Il visitatore chiede la pagina, Netlify gliela consegna dal server geograficamente
 più vicino a lui, il browser la disegna. Torniamo al capitolo 1.
 
+I due capitoli che seguono guardano dentro le tappe 2–4: **il capitolo 8** su Git
+e GitHub, **il capitolo 9** su Netlify, tutti e due con le alternative possibili
+e i casi in cui conviene sceglierle.
+
 ```
   tu scrivi        git commit         git push          in automatico
      ↓                 ↓                  ↓                   ↓
@@ -470,7 +485,339 @@ più vicino a lui, il browser la disegna. Torniamo al capitolo 1.
 
 ---
 
-## 8. Il modulo contatti: dove il sito smette di essere statico
+## 8. Git e GitHub: la macchina del tempo del progetto
+
+Il capitolo 7 li ha nominati di sfuggita. Qui si guarda dentro, perché sono i
+due strumenti che userai più spesso e sono anche quelli che vengono scambiati
+l'uno per l'altro più spesso.
+
+### Il problema che risolvono
+
+Immagina di lavorare senza. Salvi i file, poi fai una modifica grossa, poi ti
+accorgi che stavi meglio prima. Cosa fai? La risposta tradizionale è la cartella
+piena di `sito_v2`, `sito_v2_finale`, `sito_v2_finale_DEFINITIVO`, e nessuno che
+sappia più quale sia quella buona.
+
+Ci sono tre domande a cui quella cartella non sa rispondere:
+
+1. **Che cosa è cambiato fra una versione e l'altra, e perché?**
+2. **Come torno indietro esattamente a com'era il 30 agosto?**
+3. **Come facciamo in due a lavorarci senza sovrascriverci a vicenda?**
+
+Git risponde a tutte e tre. È nato nel 2005 per gestire il codice del sistema
+Linux, dove lavorano migliaia di persone contemporaneamente: se regge quello,
+regge il tuo sito.
+
+### Git: il registratore, e sta sul tuo computer
+
+Git è **un programma**, non un sito. Gira sul tuo portatile, funziona senza
+internet, e tiene in una cartella nascosta (`.git/`) la storia completa del
+progetto.
+
+L'unità di base è il **commit**: una fotografia di *tutti* i file in un dato
+istante, più tre informazioni — chi, quando, e **perché**. Il perché è la parte
+che conta, ed è quella che la gente salta.
+
+Guarda la storia vera del tuo sito:
+
+```console
+$ git log --oneline
+02d4cae Percorso Lavori: la voce accesa segue una riga di lettura
+ef82313 Design: fondo unico scuro, hero pulito, percorso Lavori, tema 2
+732da58 Design: grana, tipografia grande, animazioni allo scorrimento
+6c18f5f Sistema grafico esagonale: il sito diventa tecnico
+e67e180 Adotta il marchio, la palette e i contenuti di PROJECTUNE
+```
+
+Ogni riga è un punto a cui puoi tornare. Quel codice all'inizio (`02d4cae`) è
+il nome della fotografia. Con `git show 732da58` vedi esattamente cosa cambiava
+quel commit, riga per riga, e il messaggio lungo che spiega le ragioni.
+
+**Non è un backup.** Un backup ti dà indietro i file. Git ti dà indietro i file
+*e il ragionamento*. Fra otto mesi, quando ti chiederai perché il visualizzatore
+dei disegni ha quella struttura strana con due componenti invece di uno, la
+risposta è scritta nel commit che l'ha fatta.
+
+**Il ramo** (*branch*) è una linea parallela di lavoro. Il tuo progetto ha un
+ramo che si chiama `sito`. Se domani volessi provare un'idea rischiosa senza
+toccare quello che funziona, faresti un ramo nuovo, sperimenteresti lì, e poi
+decideresti se tenerlo o buttarlo. Il ramo principale resta intatto nel
+frattempo.
+
+### GitHub: la copia in comune, su internet
+
+GitHub è **un sito web** che ospita repository Git, più uno strato di servizi
+attorno.
+
+> **La confusione da togliersi subito.** Git sta al tuo computer come GitHub sta
+> a Dropbox. Git è il programma che tiene la storia; GitHub è il posto su
+> internet dove quella storia vive in comune. Puoi usare Git senza GitHub (e
+> funziona benissimo, per te solo). Non puoi usare GitHub senza Git.
+
+Due comandi e hai capito il rapporto fra i due:
+
+- `git push` — «manda i miei commit nuovi alla copia su GitHub»
+- `git pull` — «portami i commit che stanno su GitHub e io non ho»
+
+### Che cosa ci dà, in concreto, in questo progetto
+
+Sei cose, tutte già successe davvero qui dentro.
+
+**1. Tornare indietro.** Il 30 agosto il primo deploy vero ha mandato la home in
+un ciclo di reindirizzamenti: una regola sbagliata in `netlify.toml`. Con Git la
+soluzione peggiore possibile — «annulliamo tutto» — costa dieci secondi:
+`git revert` crea un commit che disfa esattamente quello sbagliato, senza
+cancellare la storia. Senza Git avresti dovuto ricordarti a mano cosa avevi
+toccato.
+
+**2. Sapere perché.** I messaggi di commit di questo progetto non dicono
+«modifiche varie»: dicono cosa cambia, cosa è stato misurato e cosa è stato
+scartato. È documentazione che non si può separare dal codice che descrive,
+perché viaggia insieme a lui.
+
+**3. È l'interruttore della pubblicazione.** Questa è la cosa da tenere a mente:
+**`git push` non pubblica il sito. Pubblica il codice.** È Netlify che, vedendo
+arrivare il codice nuovo, costruisce e pubblica il sito. Sono due passaggi
+distinti, ed è per questo che a volte il push va a buon fine e il sito non
+cambia — perché la build dopo è fallita.
+
+**4. Il backup fuori sede.** Se il portatile cade nel water, il progetto è
+intatto su GitHub. Ci vogliono due minuti per riaverlo su un altro computer:
+`git clone`.
+
+**5. Lavorare in più d'uno.** Quando io lavoro sul tuo progetto, lavoro su un
+ramo mio e te lo mando. Tu guardi cosa cambia prima di accettarlo. Il meccanismo
+si chiama **pull request**: letteralmente «richiesta di tirare dentro le mie
+modifiche». GitHub te la mostra come una lista di differenze, riga per riga, con
+uno spazio per commentare. Chi riceve decide se accettare, chiedere modifiche, o
+rifiutare. Su un progetto tuo da solo puoi ignorarla; appena siete in due, è lo
+strumento che evita i disastri.
+
+**6. Il modello per il prossimo cliente.** Dalle impostazioni del repository
+(*Settings* → spunta *Template repository*) GitHub ti mette un pulsante **Use
+this template**: due clic e hai una copia nuova del progetto, con storia pulita,
+pronta da riempire con i contenuti di un'altra azienda. Ne parla per esteso il
+capitolo 17.
+
+### Che cosa ti dà GitHub oltre a tenere i file
+
+Sono servizi gratuiti che stanno lì e che quasi nessuno usa:
+
+| Servizio | A cosa serve | Vale la pena per te? |
+|---|---|---|
+| **Issues** | Una lista di cose da fare attaccata al progetto, con discussioni | Sì: è il posto giusto dove annotare «manca la via della sede» invece di un foglietto |
+| **Actions** | Automazioni che girano a ogni push | Utile più avanti: potrebbe far girare da sola le quindici verifiche prima di pubblicare |
+| **Pages** | Hosting gratuito per siti statici | Alternativa a Netlify, con un limite grosso — vedi capitolo 9 |
+| **Dependabot** | Ti avvisa quando una libreria che usi ha un problema di sicurezza | Sì, e si attiva con una spunta |
+| **Releases** | Versioni marcate e scaricabili | Poco utile per un sito vetrina |
+
+### Quanto costa
+
+**Zero.** Repository pubblici e privati illimitati, collaboratori illimitati.
+Si paga (attorno ai 4 $ per persona al mese, da verificare sul loro sito) solo
+per funzioni da azienda: controlli di accesso fini, conformità, supporto.
+
+Per il tuo uso — anche con venti siti di clienti — il piano gratuito basta.
+
+### I due repository di questo progetto, e perché sono due
+
+- `investimentiesoldi` — il repository originale, dove c'erano anche i tre file
+  dell'applicazione che avevi prima.
+- `brambilla-future-sito` — **solo il sito**, con una storia sua.
+
+Li abbiamo separati su tua richiesta, ed era la scelta giusta per tre ragioni:
+la storia del sito non è sporcata da modifiche che non lo riguardano; Netlify
+costruisce solo quando cambia qualcosa che al sito interessa; e soprattutto, il
+giorno che il sito va consegnato a qualcuno, si consegna quel repository e
+basta, senza dovergli dare in mano anche il resto.
+
+**Regola generale: un repository per cosa pubblicabile.** Un sito, un
+repository. Due siti, due repository.
+
+### Le alternative a GitHub
+
+| | Cos'è | Vantaggi | Svantaggi | Quando sceglierlo |
+|---|---|---|---|---|
+| **GitHub** | Il più diffuso, di Microsoft | Tutti lo conoscono, integrazione nativa con Netlify/Vercel, ecosistema enorme, gratis | È di Microsoft, se questo ti pesa | **Il valore di riferimento.** Nel dubbio, questo |
+| **GitLab** | Concorrente storico, anche installabile sui tuoi server | Strumenti di automazione più potenti già inclusi, versione gratuita installabile in proprio | Interfaccia più pesante, comunità più piccola | Se vuoi poter portare tutto in casa un domani |
+| **Bitbucket** | Di Atlassian | Integrato con Jira e Trello | In calo, meno integrazioni | Solo se l'azienda usa già Jira |
+| **Codeberg** | Associazione no-profit europea, senza scopo di lucro | Nessuna azienda dietro, dati in Europa, gratuito | Poche integrazioni automatiche, servizi minori | Se la sovranità dei dati è un requisito dichiarato |
+| **Gitea / Forgejo** | Te lo installi tu su un server tuo | Controllo totale, costa solo il server | **Lo mantieni tu**: aggiornamenti, backup, sicurezza | Solo se hai già un server e voglia |
+| **Nessun remoto** | Git solo sul tuo computer | Zero dipendenze esterne | Niente backup, niente collaborazione, e **Netlify non può costruire da solo** | Prototipi usa e getta |
+
+> **La cosa più importante di questa tabella: non c'è vincolo.** Un repository
+> Git è completo e autonomo — la storia intera sta nella cartella `.git/` sul
+> tuo computer. Spostarlo da GitHub a GitLab è un comando
+> (`git remote set-url`) e un push. Non perdi niente e non c'è niente da
+> esportare. Questo è il motivo per cui la scelta di GitHub è a basso rischio:
+> è reversibile in cinque minuti.
+
+### Le due cose che confondono sempre
+
+1. **Git non è GitHub.** Il primo è il registratore, il secondo è il magazzino.
+2. **Fare push non è pubblicare.** Push manda il codice a GitHub. La
+   pubblicazione è un'altra cosa, e la fa Netlify. Il prossimo capitolo.
+
+---
+
+## 9. Netlify: chi tiene acceso il sito
+
+### Cos'è un hosting, in una riga
+
+Un computer sempre acceso, con un indirizzo pubblico, che consegna file a chi
+li chiede. Tutto qui. La differenza fra un hosting e un altro sta in quanto è
+veloce, quanto costa, e quanto lavoro fa al posto tuo.
+
+### Perché il tuo sito ha bisogno di pochissimo
+
+Il capitolo 2 diceva che questo è un sito **statico**: le pagine sono già
+scritte su disco. Non c'è un database da interrogare, non c'è PHP da eseguire,
+non c'è WordPress da aggiornare. L'hosting deve solo **consegnare dei file**.
+
+Consegnare file è l'operazione più banale e più ottimizzata di internet. È il
+motivo per cui il tuo sito costa zero, non si rompe da solo, e non può essere
+bucato: **non c'è niente da bucare**, non c'è un programma in esecuzione da
+attaccare. Un sito WordPress compromesso è una notizia settimanale; una cartella
+di file HTML non si compromette.
+
+### Cosa fa Netlify per noi, punto per punto
+
+Non è solo un posto dove appoggiare i file. Fa otto cose, e ognuna è lavoro che
+altrimenti dovresti fare a mano.
+
+**1. Costruisce da solo.** Guarda il repository su GitHub. Appena arriva un
+commit: scarica il progetto, esegue `npm install` e `npm run build`, prende la
+cartella `dist/` e la pubblica. Nel gergo si chiama *CI/CD* (integrazione e
+distribuzione continua) e vuol dire questo: **tu spingi il codice, il sito
+esce**. Se la build fallisce, Netlify **non pubblica niente** e lascia online la
+versione buona precedente. È una rete di sicurezza: non puoi mettere online un
+sito rotto per distrazione.
+
+**2. Copia il sito in tutto il mondo.** Le pagine non stanno su un server solo,
+ma su una **CDN**: decine di server in città diverse, ognuno con una copia. Un
+visitatore di Bologna riceve la pagina da un server vicino, uno di Sydney da un
+altro. Conta: la distanza fisica è latenza, e la latenza è quello che fa
+sembrare un sito lento.
+
+**3. Il lucchetto, gratis e automatico.** Il certificato HTTPS (quello che fa
+apparire il lucchetto e toglie l'avviso «Non sicuro») viene richiesto,
+installato e **rinnovato da solo** ogni tre mesi. Su un hosting tradizionale è
+una pratica da fare a mano, o una voce a pagamento. Non è un dettaglio estetico:
+senza, Chrome mette un avviso e Google penalizza.
+
+**4. Il dominio.** Colleghi `www.projectune.it` al sito da un pannello,
+seguendo istruzioni scritte. Netlify può anche fare da gestore DNS, oppure
+lasciare che resti dove il dominio è stato comprato.
+
+**5. Pubblicazioni atomiche e ritorno indietro in un clic.** Ogni pubblicazione
+è una versione **completa e immutabile** del sito. Non esiste il momento in cui
+metà dei file sono nuovi e metà vecchi. E dal pannello vedi tutte le
+pubblicazioni passate con un pulsante *Publish deploy*: clicchi, e in tre
+secondi il sito torna a com'era martedì scorso. È Git applicato al sito
+pubblicato.
+
+**6. Le anteprime.** Ogni ramo e ogni pull request ottiene **un indirizzo
+temporaneo suo**, con sopra il sito costruito da quel ramo. Serve esattamente
+per quello di cui parlavamo: guardare una modifica grafica *prima* che vada
+online, su un indirizzo che puoi aprire dal telefono e mandare a qualcun altro.
+È lo strumento più sottovalutato di tutto l'impianto.
+
+**7. Le funzioni serverless.** È il pezzo che rende il tuo sito «statico con
+un'eccezione». `netlify/functions/contact.ts` è un programma che **non gira mai**
+finché qualcuno non invia il modulo contatti; in quel momento Netlify lo accende,
+lui manda le due email, e si spegne. *Serverless* non vuol dire «senza server»:
+vuol dire che il server non è tuo, non lo aggiorni, non lo paghi quando è fermo.
+Per un modulo contatti che riceve dieci messaggi al mese è l'architettura
+perfetta.
+
+**8. Regole, segreti e registri.** `netlify.toml` contiene le intestazioni di
+sicurezza (compresa la CSP che vieta il codice scritto dentro le pagine), i
+reindirizzamenti e le regole di cache. Le chiavi dei servizi stanno nelle
+variabili d'ambiente del pannello, **mai nel codice**. E ogni invocazione della
+funzione contatti lascia un registro leggibile, che è dove si va a guardare
+quando un'email non arriva.
+
+### Quanto costa
+
+Il piano gratuito, che è quello su cui gira il tuo sito:
+
+| Voce | Limite del piano gratuito | Cosa vuol dire per un sito vetrina |
+|---|---|---|
+| Traffico | ~100 GB al mese | Il tuo sito pesa ~140 kB a visita: sono centinaia di migliaia di visite |
+| Minuti di build | ~300 al mese | Una build tua dura ~2 minuti: circa 150 pubblicazioni al mese |
+| Invocazioni di funzioni | ~125.000 al mese | Il modulo contatti ne userà qualche decina |
+| Siti | Illimitati | Ci stanno tutti i clienti che vuoi |
+| Membri del team | 1 | Il limite vero, se un giorno siete in due |
+
+> **Verifica i numeri.** Le condizioni dei piani gratuiti cambiano, e a volte in
+> peggio. Prima di prendere un impegno con un cliente, controlla la pagina vera:
+> `netlify.com/pricing`. Vale per ogni numero di questo capitolo.
+
+Se sfori, Netlify non spegne il sito: ti avvisa e ti chiede di passare al piano
+a pagamento (attorno ai 19 $ al mese per postazione). Per un sito vetrina non
+succederà.
+
+### Quanto siamo legati a Netlify?
+
+Questa è la domanda giusta da farsi su qualunque fornitore, e la risposta qui è
+rassicurante: **pochissimo**.
+
+Il risultato della build è `dist/`, una cartella di HTML, CSS, immagini. La
+serve qualunque hosting del mondo, anche il più scalcinato. Le uniche due cose
+legate a Netlify sono:
+
+1. `netlify.toml` — intestazioni e reindirizzamenti. Ogni piattaforma ha il suo
+   equivalente, si riscrive in un'ora.
+2. `netlify/functions/contact.ts` — la funzione del modulo. Il codice è già
+   scritto in modo da non dipendere da un fornitore di posta specifico; portarlo
+   su Cloudflare Workers o su una funzione Vercel è mezza giornata.
+
+**Traslocare tutto il sito: circa mezza giornata.** È poco, ed è voluto. Ogni
+volta che un fornitore ti offre una comodità che ti incatena a lui, quella
+comodità ha un prezzo nascosto.
+
+### Le alternative
+
+| | Cos'è | Vantaggi | Svantaggi | Il modulo contatti funziona? | Quando sceglierlo |
+|---|---|---|---|---|---|
+| **Netlify** | Piattaforma per siti statici, con funzioni | Il più semplice da capire, anteprime ottime, funzioni incluse, uso commerciale permesso nel piano gratuito | Limite di 1 persona nel piano gratuito, minuti di build contati | Sì, com'è ora | **Il valore di riferimento** per un sito vetrina di un cliente |
+| **Cloudflare Pages** | Lo stesso, sulla rete Cloudflare | **Traffico illimitato** anche gratis, la rete più veloce del mondo, gratuito molto generoso | Interfaccia meno amichevole, le funzioni (*Workers*) hanno regole loro | Sì, ma la funzione va riscritta | **Se fai molti siti**: è quello che regge meglio la crescita a costo zero |
+| **Vercel** | Concorrente diretto, di chi ha inventato Next.js | Esperienza di sviluppo eccellente, anteprime ottime | **Il piano gratuito vieta l'uso commerciale**: un sito di un cliente che paga, formalmente, non ci può stare | Sì | Progetti personali, o se paghi il piano Pro |
+| **GitHub Pages** | Hosting gratuito dentro GitHub | Gratis, zero configurazione, sta dove sta già il codice | **Nessuna funzione serverless**, nessuna anteprima, intestazioni di sicurezza non configurabili | **No** — servirebbe un servizio esterno per il modulo | Documentazione, siti senza moduli |
+| **Render** | Piattaforma generalista | Fa anche siti dinamici e database, se un domani servissero | Piano gratuito più stretto, i servizi gratuiti si «addormentano» | Sì | Se il progetto crescerà verso qualcosa di dinamico |
+| **Hosting classico italiano** (Aruba, Register, Netsons) | Spazio web con FTP e PHP | Il cliente lo conosce e ha già la fattura italiana, assistenza in italiano al telefono | **Nessuna build automatica**: la cartella `dist/` si carica a mano via FTP a ogni modifica. Niente anteprime, HTTPS spesso da configurare | Sì, ma riscritto in PHP | Se il cliente ha già tutto lì e non vuole sentire ragioni |
+| **VPS** (server tuo, tipo Hetzner) | Un computer a noleggio, vuoto | Controllo totale, costa pochi euro al mese | **Lo amministri tu**: aggiornamenti di sicurezza, certificati, backup, monitoraggio. È un lavoro vero | Sì, come vuoi tu | Mai, per un sito vetrina |
+| **AWS S3 + CloudFront** | I mattoni grezzi di Amazon | Scalabilità illimitata, costo bassissimo a volume | Complicato da mettere in piedi, la fattura è a consumo e va tenuta d'occhio | Con AWS Lambda, da scrivere | Solo dentro un'azienda che è già su AWS |
+
+### Come scegliere, in tre righe
+
+- **Sito vetrina di un cliente, zero pensieri** → Netlify. È dove siamo.
+- **Cinque o più siti, voglio restare a costo zero** → Cloudflare Pages.
+- **Il cliente ha già Aruba e non si sposta** → si può fare, ma spiegagli cosa
+  perde: ogni modifica diventa un caricamento manuale, e le anteprime spariscono.
+- **Attenzione a Vercel** se il sito è di un'azienda che paga: il piano gratuito
+  non lo consente.
+
+### Due cose che non c'entrano con Netlify e che tutti confondono
+
+**Il dominio non è l'hosting.** Il dominio (`projectune.it`) si compra da un
+*registrar* — Cloudflare Registrar lo vende a prezzo di costo, Namecheap è
+economico, Aruba e Register.it sono i più usati in Italia e costano un po' di
+più ma fanno fattura italiana. Costa 10–20 € l'anno e **va rinnovato**: un
+dominio scaduto è un sito sparito, ed è l'incidente più frequente e più stupido
+che capita ai siti piccoli. Il collegamento fra il nome e il sito si fa con il
+**DNS**, che è l'elenco telefonico di internet: dici «projectune.it sta qui», e
+il mondo lo trova.
+
+**Il sito non ti dà l'email.** Sono due servizi diversi. Oggi i contatti di
+PROJECTUNE arrivano a una casella Gmail, e va benissimo. Se un domani il cliente
+volesse `info@projectune.it`, serve un servizio di posta a parte: Google
+Workspace (~6 €/utente al mese), Zoho Mail (ha un piano gratuito per un dominio),
+o la casella inclusa in un hosting tradizionale. Non è una cosa che Netlify fa.
+
+---
+
+## 10. Il modulo contatti: dove il sito smette di essere statico
 
 Un file HTML non può mandare email. L'HTML descrive, non agisce. Serve un
 programma che giri su un computer acceso.
@@ -515,7 +862,7 @@ codice. Non ne trova.
 
 ---
 
-## 9. Farsi trovare: come funziona davvero il SEO
+## 11. Farsi trovare: come funziona davvero il SEO
 
 **SEO** sta per *Search Engine Optimization*: rendere un sito comprensibile ai
 motori di ricerca. Non è un trucco, è buona educazione verso una macchina che
@@ -570,7 +917,7 @@ settimane prima che compaia: è normale.
 
 ---
 
-## 10. Accessibilità: non è beneficenza
+## 12. Accessibilità: non è beneficenza
 
 Accessibilità vuol dire che il sito è usabile anche da chi non vede, non usa il
 mouse, non distingue i colori, o semplicemente sta guardando il telefono al sole.
@@ -601,7 +948,7 @@ navigare il sito con la sola tastiera.
 
 ---
 
-## 11. Le verifiche automatiche e perché esistono
+## 13. Le verifiche automatiche e perché esistono
 
 Il progetto ha quindici controlli che si lanciano da riga di comando. L'esito
 dell'ultima esecuzione, con l'output vero dei comandi, è in `RESULTS.md`.
@@ -628,7 +975,7 @@ la build si interrompe se un progetto ha un campo mancante, se un titolo supera 
 
 ---
 
-## 12. Glossario
+## 14. Glossario
 
 | Parola | Che cosa vuol dire |
 |---|---|
@@ -664,10 +1011,23 @@ la build si interrompe se un progetto ha un campo mancante, se un titolo supera 
 | **Markdown** | Modo semplice di scrivere testo formattato |
 | **npm** | Il gestore dei pacchetti e dei comandi del progetto |
 | **localhost** | «Questo computer»: il sito che vedi solo tu |
+| **Branch** (ramo) | Una linea di lavoro parallela, che non tocca quella principale |
+| **Push / Pull** | Mandare i propri commit al remoto / portarsi a casa quelli degli altri |
+| **Remoto** | La copia del repository che sta su internet, per esempio su GitHub |
+| **Pull request** | La proposta di far entrare le proprie modifiche, con le differenze da rivedere |
+| **Clone** | La copia locale di un repository remoto |
+| **CI/CD** | La catena automatica che, a ogni push, costruisce e pubblica |
+| **CDN** | La rete di server sparsi nel mondo che consegna le pagine dal più vicino |
+| **Rollback** | Il ritorno a una versione pubblicata prima, in un clic |
+| **Anteprima di deploy** | L'indirizzo temporaneo dove si guarda una modifica prima che vada online |
+| **Registrar** | Chi ti vende e ti rinnova il dominio. Non è l'hosting |
+| **CMS** | Il pannello con cui chi non programma scrive i contenuti |
+| **Monorepo** | Un repository solo che contiene più progetti o più siti |
+| **Piano gratuito** (*free tier*) | La soglia sotto la quale un servizio non si paga. Cambia: va verificata |
 
 ---
 
-## 13. Cosa imparare dopo
+## 15. Cosa imparare dopo
 
 In ordine di utilità per te, non di difficoltà.
 
@@ -696,7 +1056,7 @@ resta in testa.
 
 ---
 
-## 14. Rifarlo per un cliente
+## 16. Rifarlo per un cliente
 
 > «Se volessi creare un sito per un'azienda esterna simile a questo, potrei farlo
 > funzionare così?»
@@ -819,6 +1179,166 @@ codice, le verifiche che girano prima di pubblicare, il `README` che spiega cosa
 sostituire. Su un sito tuo sembrano pignolerie. Su un sito di qualcun altro, che
 riaprirai fra otto mesi senza ricordarti niente, sono la differenza fra
 mezz'ora e mezza giornata.
+
+---
+
+## 17. Da un sito a venti: fare siti per più clienti
+
+Il capitolo 16 risponde alla domanda «posso rifarlo per un'azienda esterna?» e
+si occupa di **un** cliente: cosa cambiare, chi possiede cosa, chi aggiorna i
+testi. Questo capitolo parte da dove finisce quello, e si occupa del resto:
+**come ci si organizza quando i siti diventano tre, cinque, venti**, e quali
+scelte prese al secondo sito te ne fanno risparmiare cento al ventesimo.
+
+### Tre modi di organizzarsi, e quando passare dall'uno all'altro
+
+| | Com'è fatto | Vantaggi | Svantaggi | Quando |
+|---|---|---|---|---|
+| **A. Un repository e un sito per cliente** | Ogni cliente ha il suo repository GitHub e il suo sito Netlify, indipendenti | Semplicissimo. Un cliente non può rompere il sito di un altro. Consegnabile: gli dai il repository e sei fuori | Una correzione utile a tutti va ricopiata a mano su ognuno | **Da 1 a 5 siti.** È dove sei adesso |
+| **B. Repository modello + copie** | Tieni un repository «modello» aggiornato; ogni cliente nasce da una sua copia | Il cliente nuovo parte in dieci minuti già corretto. Le copie restano indipendenti | Le copie divergono col tempo: dopo un anno nessuna è più uguale al modello | **Da 3 a 15 siti.** Il passo naturale dopo il secondo cliente |
+| **C. Un solo codice, tanti siti** | Un repository unico; i contenuti di ogni cliente in una cartella, e la build produce N siti | Correggi una volta per tutti. Aggiorni le librerie una volta sola | Un errore va online su venti siti insieme. Personalizzare per uno solo diventa difficile. Serve più mestiere | **Oltre i 10–15 siti**, e solo se sono davvero simili |
+
+Il consiglio è quello che il capitolo 16 dà già e che vale la pena ripetere:
+**non partire dal C**. Costruire l'astrazione giusta richiede di aver visto
+almeno tre clienti veri. Se la costruisci prima, astrai le cose che immaginavi
+cambiassero invece di quelle che cambiano davvero.
+
+### Cosa si ripete e cosa no
+
+Fra due siti vetrina fatti così, il **codice si ripete al 90%** e il
+**contenuto allo 0%**. Il valore di un modello sta tutto nel tenere separate le
+due cose — e in questo progetto la separazione è già tracciata, non per caso:
+
+| Il contenuto (cambia sempre) | La macchina (non si tocca) |
+|---|---|
+| `src/lib/` — azienda, servizi, clienti, processo, percorso, testi legali | `src/components/` |
+| `src/i18n/it.json` — ogni parola dell'interfaccia | `src/layouts/` |
+| `src/content/progetti/` — i lavori | `src/scripts/` |
+| `public/img/`, `public/fonts/`, `brand/` | `netlify/functions/` |
+| `src/styles/global.css` — colori e caratteri | `scripts/` — i generatori e le verifiche |
+| `astro.config.mjs` — il dominio | `tests/` |
+
+È il motivo per cui in questo progetto **nessuna parola è scritta dentro un
+componente**, e c'è un controllo automatico (`npm run check:i18n`) che lo
+impedisce. Sembrava pignoleria; è la cosa che rende il progetto copiabile.
+
+### Come parte il cliente numero 2, in pratica
+
+Una mattina, se i contenuti ci sono:
+
+1. Su GitHub, dal repository del sito: **Use this template** → nome nuovo.
+2. `git clone`, `npm install`, `npm run dev` — il sito di PROJECTUNE gira in locale.
+3. Metti il PDF del marchio del cliente in `brand/` e lancia `npm run logo`:
+   ne escono l'SVG e la favicon, ricavati dal vettoriale vero, non ridisegnati.
+4. Cambia i colori e i caratteri in `src/styles/global.css` (le variabili in
+   cima, il resto segue da solo). Il capitolo 6 spiega come.
+5. Sostituisci i contenuti nei file della colonna di sinistra qui sopra.
+6. Immagini e foto in `public/img/`.
+7. `astro.config.mjs`: il dominio nuovo.
+8. Lancia le verifiche: `npm run build && npm run check && npm test`, poi
+   `check:pages`, `check:responsive`, `check:html`, `check:links`, `check:i18n`.
+   Ti dicono se hai dimenticato qualcosa meglio di quanto te ne accorga tu.
+9. Su Netlify: nuovo sito dal repository, variabili d'ambiente, dominio.
+10. Consegna: capitolo 16, paragrafo «Chi possiede cosa».
+
+### I temi: il moltiplicatore che hai già
+
+Il sito ha due linee grafiche (capitolo 6, ricetta «Cambiare il vestito del
+sito»): quella scura metallica e quella «foglio da disegno». Aggiungerne una
+terza sono tre passi, tutti scritti nel `README`.
+
+Per uno studio, questo cambia il modo di vendere. Con quattro o cinque temi in
+libreria puoi far vedere a un cliente **il suo sito, con i suoi contenuti, in
+tre vesti diverse, in un pomeriggio**, invece di discutere su bozze astratte. E
+il cliente sceglie su qualcosa di vero, non su un'immagine.
+
+Attenzione a una cosa: ogni tema in più è codice da mantenere. Cinque temi ben
+fatti valgono più di quindici abbozzati.
+
+### Gli account: le decisioni da prendere prima, non dopo
+
+| Cosa | Meglio intestarlo a | Perché |
+|---|---|---|
+| **Dominio** | **Sempre al cliente** | Se è tuo, tecnicamente il suo sito è tuo. È un guaio legale e un pessimo modo di lavorare |
+| **Casella email** | **Sempre al cliente** | Ci passano i contatti dei suoi clienti: sono dati suoi |
+| **Repository GitHub** | Tuo, con il cliente come collaboratore — oppure suo, con te collaboratore | Il primo modo è più comodo finché lo mantieni tu; il secondo rende la separazione indolore |
+| **Account Netlify** | Un *team* tuo, finché lo mantieni tu | Gestire venti account separati è ingestibile. Ma mettilo per iscritto: alla fine del rapporto il sito si trasferisce |
+| **Chiavi dei servizi** (posta, antispam) | Al cliente, se ce la fa. Altrimenti tue, dichiarate | Sono a suo nome i messaggi che partono |
+
+> **La clausola che ti salva.** Scrivi nel preventivo, in una riga: *«Alla
+> cessazione del rapporto, dominio, repository e sito vengono trasferiti al
+> committente entro X giorni»*. Costa nulla, e toglie dal tavolo l'unica
+> discussione che avvelena davvero i rapporti con i clienti.
+
+### I costi, man mano che si cresce
+
+| | 1 sito | 5 siti | 20 siti |
+|---|---|---|---|
+| Domini (a carico del cliente) | 10–20 €/anno | 50–100 €/anno | 200–400 €/anno |
+| Hosting (Netlify o Cloudflare, piano gratuito) | 0 € | 0 € | 0 €, ma controlla i minuti di build |
+| GitHub | 0 € | 0 € | 0 € |
+| Posta transazionale per i moduli | 0 € | 0 € | Probabilmente ancora 0 €, dipende dal volume |
+| **Il costo vero** | **Il tuo tempo** | **Il tuo tempo** | **Il tuo tempo, e comincia a pesare** |
+
+L'infrastruttura, praticamente, è gratis. È un argomento di vendita fortissimo
+contro un WordPress in hosting condiviso — che parte da qualche decina di euro
+l'anno *a sito* e va aggiornato ogni mese o si buca. Ma non raccontartela: il
+costo di venti siti non è l'hosting, è la manutenzione.
+
+### La manutenzione a venti siti: il problema vero
+
+È qui che gli studi piccoli affogano, ed è bene saperlo prima. Venti siti
+vogliono dire venti volte: librerie che invecchiano, versioni di Node che
+cambiano, un fornitore che ridisegna il pannello, un certificato, un dominio in
+scadenza.
+
+Quattro cose che riducono il problema da ingestibile a mezza giornata al mese:
+
+1. **Un rito fisso.** Il primo lunedì del mese: `npm update`, build, verifiche,
+   push. Su un sito statico va liscio quasi sempre, perché le dipendenze sono
+   quattro e sono tutte ufficiali.
+2. **Dependabot attivo su ogni repository.** Gratis, una spunta: ti apre da solo
+   una pull request quando una libreria ha un problema di sicurezza.
+3. **Le verifiche automatiche su GitHub Actions.** Le quindici verifiche di
+   questo progetto possono girare da sole a ogni push. Con venti siti non puoi
+   ricordarti di lanciarle a mano; con Actions non devi.
+4. **Un foglio con le scadenze.** Domini e certificati, con la data. Il modo più
+   comune di perdere un sito non è un attacco informatico: è un rinnovo
+   dimenticato.
+
+### Dove il cliente scrive i suoi testi, quando i clienti sono tanti
+
+Il capitolo 16 elenca le tre strade (lo fai tu / l'editor di GitHub / un CMS).
+Con molti clienti la scelta cambia di peso: **fare tu le modifiche a venti
+clienti non scala**. Le due opzioni serie diventano:
+
+- **Decap CMS o Sveltia CMS** — gratuiti, vivono dentro il sito stesso, scrivono
+  su Git. Il cliente entra da `iltuosito.it/admin`, vede un modulo, salva, e
+  sotto succede un commit che fa ripartire la pubblicazione. Costo: mezza
+  giornata di configurazione **per modello** (non per cliente, se lo metti nel
+  modello), e resta gratis. È la strada giusta.
+- **Un CMS ospitato** (Sanity, Storyblok, Contentful) — più curati, più
+  potenti, con piani gratuiti limitati e poi a pagamento **per sito**. Hanno
+  senso se il cliente ha una redazione vera.
+
+Qualunque cosa scegli, ricordati che **un CMS è una cosa in più da mantenere**:
+aggiungerlo a un sito che cambia due volte l'anno è lavoro sprecato.
+
+### Il modello di servizio, in due righe
+
+Quello che funziona per siti così, ed è onesto verso tutti e due:
+
+- **Un compenso di impianto** per costruirlo — la parte grossa.
+- **Un canone annuale di manutenzione**, che dichiara cosa comprende: le
+  passate di aggiornamento, N modifiche ai testi, il controllo delle scadenze,
+  il tempo di risposta se qualcosa si rompe.
+- **Fuori dal canone**, a preventivo: pagine nuove, restyling, funzioni nuove.
+
+Il canone non è un modo di far pagare l'aria: un sito senza manutenzione, dopo
+tre anni, è un sito che nessuno sa più ricostruire. Il tuo, fra l'altro, ha
+`README`, `PLAN`, `RESULTS` e questa guida scritti apposta perché quel momento
+arrivi il più tardi possibile — e perché, se arriva, chiunque ci possa mettere
+le mani.
 
 ---
 
