@@ -42,7 +42,20 @@
     "campoObbligatorio": "Campo obbligatorio",
     "campoFacoltativo": "facoltativo",
     "aggiornatoIl": "Aggiornato il",
-    "inEvidenza": "In evidenza"
+    "inEvidenza": "In evidenza",
+    "filtri": "Filtri",
+    "filtraPerTag": "Tag",
+    "filtraPerCommittente": "Committente",
+    "ordinaPer": "Ordina per",
+    "ordineRilevanza": "Rilevanza",
+    "ordineData": "Data della commessa",
+    "tuttiICommittenti": "Tutti",
+    "azzeraFiltri": "Azzera",
+    "paginazione": "Pagine dei lavori",
+    "paginaPrecedente": "Pagina precedente",
+    "paginaSuccessiva": "Pagina successiva",
+    "vaiAllaPagina": "Vai alla pagina",
+    "filtriAttivi": "filtri attivi"
   },
   "home": {
     "metaTitolo": "PROJECTUNE | Progettazione meccanica e montaggi",
@@ -85,7 +98,8 @@
     "introduzione": "Lavoriamo su commessa, in officina da noi o direttamente dal cliente. Ogni servizio si può chiedere da solo oppure insieme agli altri: c'è chi ci porta un'idea e chi ci porta una macchina ferma.",
     "cosaComprende": "Che cosa comprende",
     "ctaTitolo": "Non trovate quello che vi serve?",
-    "ctaTesto": "Chiamateci e raccontateci il problema. Se non è cosa nostra ve lo diciamo subito, e dove possiamo vi indichiamo chi può risolverlo."
+    "ctaTesto": "Chiamateci e raccontateci il problema. Se non è cosa nostra ve lo diciamo subito, e dove possiamo vi indichiamo chi può risolverlo.",
+    "apri": "Apri"
   },
   "progetti": {
     "metaTitolo": "Lavori | PROJECTUNE",
@@ -108,7 +122,10 @@
     "videoTitolo": "Video della sala test",
     "videoAttesa": "Segnaposto: qui andrà la ripresa della prova di tenuta, appena il cliente la fornisce.",
     "videoDurata": "In arrivo",
-    "elencoTitolo": "Tutti i lavori pubblicati"
+    "elencoTitolo": "Tutti i lavori pubblicati",
+    "lavoriSimili": "Lavori simili",
+    "lavoriSimiliSottotitolo": "Altri lavori che portano lo stesso tag.",
+    "nessunRisultato": "Nessun lavoro con questi filtri."
   },
   "chiSiamo": {
     "metaTitolo": "Chi siamo | PROJECTUNE",

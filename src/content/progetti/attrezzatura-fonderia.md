@@ -1,9 +1,12 @@
 ---
 titolo: Attrezzatura per macchinari di fonderia
-cliente: Costruttore di macchinari per fonderia
+committente: fonderia
 categoria: Progettazione
 data: 2025-02-11
 descrizioneBreve: "Progettazione di attrezzature per macchinari di fonderia: un ambiente dove il calore, la dilatazione e la manutenzione contano più dell'eleganza."
+puntiChiave:
+  - Attrezzatura disegnata sul ciclo di lavoro esistente
+  - Materiali scelti per il calore e per l’abrasione
 immagine: /img/progetti/attrezzatura-fonderia.svg
 immagineAlt: Schema di uno stampo in due parti con il piano di divisione tratteggiato, la colata in blu e le colonne di guida.
 ---

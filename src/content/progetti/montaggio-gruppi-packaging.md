@@ -1,9 +1,13 @@
 ---
 titolo: Montaggio di gruppi per linee di packaging
-cliente: Costruttore di macchine automatiche, settore packaging
+committente: costruttore-packaging
 categoria: Montaggio
 data: 2025-07-22
 descrizioneBreve: "Montaggio in piccola serie di gruppi di trasmissione per macchine da imballaggio, con prova di rotazione e verifica dei giochi prima della consegna."
+puntiChiave:
+  - Serie montata con la stessa sequenza su tutti i pezzi
+  - Coppie di serraggio registrate dove contano
+  - Prova funzionale su ogni gruppo prima della spedizione
 immagine: /img/progetti/montaggio-gruppi-packaging.svg
 immagineAlt: Schema di una trasmissione a cinghia con due pulegge, i loro assi in blu e una freccia che indica il senso di rotazione.
 inEvidenza: true

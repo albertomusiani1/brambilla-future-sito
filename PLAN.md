@@ -23,6 +23,25 @@ l'isola del form contatti. Collection `progetti` estendibile via file Markdown.
   rieseguite: Lighthouse 99/100/100/100 (il punto di Performance è il prezzo del
   terzo carattere, misurato: LCP da 1,66 a 1,81 s), CLS 0, responsive 48/48,
   html-validate 0 errori, 60 collegamenti, 14 test verdi.
+- 2026-09-23 16:30 — **Le schede dei lavori diventano una cosa seria.** Su
+  indicazioni del proprietario: di un lavoro restano obbligatori **solo titolo
+  e abstract**, tutto il resto compare se compilato e sparisce se no; punti
+  chiave sotto l'abstract; copertina facoltativa, con segnaposto nell'anteprima
+  e, nella pagina, dopo i punti chiave invece che in cima; **anagrafica unica
+  dei committenti** (`src/lib/committenti.ts`) con marchio e interruttore
+  «visibile», che alimenta insieme le schede e la fascia delle referenze; in
+  fondo alla scheda «Lavori simili», filtrati per tag, al posto di «Altri
+  lavori»; pannello **Filtri** con tag, committente e ordinamento per
+  rilevanza o data; impaginazione a tre righe per pagina; la fascia dei
+  committenti spostata sotto l'elenco dei lavori; pagina Servizi rifatta a
+  riquadri quadrati che si aprono. Una quarta isola JavaScript, 2,2 kB, solo
+  su `/progetti`, e solo per quello che senza calcolo non si può fare: senza
+  JavaScript l'elenco è completo e il filtro per tag funziona lo stesso.
+  Restano fuori, perché richiedono un'architettura diversa, l'area riservata
+  `/admin` e le sue funzioni: sono descritte in «Problemi aperti».
+  Verifiche: 0 errori di tipo su 60 file, 14 test verdi, 24/24 pagine,
+  html-validate 0 errori, 61 collegamenti, responsive 48/48, Lighthouse
+  100 di accessibilità su tutte le pagine provate.
 - 2026-08-30 09:40 — PLAN.md creato. Nessun codice ancora scritto.
 - 2026-08-30 10:05 — Fasi 1–7 completate: setup, design system, layout, tutte le 10 pagine,
   collection con 6 progetti, form contatti con funzione Netlify e 14 test verdi, SEO e
@@ -645,6 +664,59 @@ l'isola del form contatti. Collection `progetti` estendibile via file Markdown.
     dichiarata in `check-js.mjs` ha cambiato nome: il nome è quello del file che
     porta lo `<script>`, e va tenuto vero.
 
+58. **Di un lavoro sono obbligatori solo il titolo e l'abstract.** Tutto il
+    resto è facoltativo e **quello che manca non compare**, invece di comparire
+    vuoto: niente «Cliente: —», niente riquadri con un trattino dentro. È la
+    regola che permette di pubblicare un lavoro appena si sa qualcosa e di
+    completarlo dopo, invece di tenerlo nel cassetto finché non è perfetto.
+    Due eccezioni, perché sono coppie che non hanno senso a metà e la build le
+    controlla: un'immagine senza il suo testo alternativo (difetto di
+    accessibilità) e un modello 3D senza anteprima (buco senza JavaScript).
+
+59. **I committenti sono un'anagrafica, non un campo di testo.** Prima il nome
+    del cliente era una stringa libera dentro ogni file, e l'elenco delle
+    referenze era un secondo file scritto a mano: due posti dove scrivere la
+    stessa azienda, e nessuno che impedisse «Revortex srl» in uno e «Revortex
+    S.r.l.» nell'altro. Adesso `src/lib/committenti.ts` è l'unica anagrafica,
+    i lavori la referenziano per id, e **la build si ferma se l'id non
+    esiste**. L'interruttore `visibile` separa «abbiamo lavorato per loro» da
+    «possiamo dirlo»: un committente non visibile compare nella scheda del suo
+    lavoro ma non fra le referenze. Alternativa scartata: tenere le due liste
+    separate e raccomandare attenzione — le raccomandazioni non passano le
+    verifiche.
+
+60. **La pagina del lavoro non si apre più con l'immagine.** Quello che dice di
+    che lavoro si tratta è il testo: titolo, abstract, punti chiave. La
+    copertina arriva dopo, prima del tag e dei dati. Un'immagine in cima spinge
+    sotto la piega proprio le tre righe che servono a capire se vale la pena
+    leggere.
+
+61. **Una quarta isola, e solo per quello che senza calcolo non si fa.** Filtro
+    per committente, ordinamento e impaginazione richiedono di contare e
+    riordinare: in CSS puro si sarebbero potuti fare solo duplicando l'elenco
+    per ogni ordinamento possibile, e l'impaginazione non si sarebbe potuta
+    ricalcolare a filtro attivo. L'isola pesa 2,2 kB e sta solo su
+    `/progetti`. **Il filtro per tag resta in CSS** e continua a funzionare
+    senza JavaScript; i due comandi che senza JavaScript non funzionerebbero
+    **non compaiono affatto**, invece di comparire inerti. Un bottone che non
+    fa niente è peggio di un bottone che non c'è.
+
+62. **`[hidden]` deve vincere su `display`.** Difetto trovato guardando la
+    pagina, non il sorgente: il contatore dei filtri mostrava «0» e
+    l'impaginazione restava visibile con una pagina sola, perché `display:
+    grid` e `display: flex` dichiarati dopo battono l'attributo `hidden`. La
+    riga `[hidden] { display: none !important }` nel reset lo risolve una volta
+    per tutte. Vale la pena saperlo: è un difetto che non si vede mai leggendo
+    il codice.
+
+63. **I riquadri dei servizi e il pannello dei filtri sono `<details>`.**
+    Apertura, chiusura, stato e tastiera li gestisce il browser; l'attributo
+    `name` sui servizi li rende un gruppo, quindi ne resta aperto uno per
+    volta. E un servizio raggiunto da `/servizi#progettazione` si apre da solo,
+    perché il browser apre il `<details>` che è bersaglio dell'ancora.
+    Alternativa scartata: un accordion scritto a mano, che sarebbe stato
+    JavaScript per rifare peggio una cosa che il browser fa già.
+
 ---
 
 ## Versioni installate
@@ -704,7 +776,21 @@ proprietario e dal cliente, e non possono essere chiuse da qui:
    intestazioni non vengono mai eseguiti in locale. È il buco da cui è passato il ciclo
    di reindirizzamenti del 30 agosto. Ogni modifica a `netlify.toml` va provata su un
    deploy reale, controllando almeno la home, una pagina interna e `/robots.txt`.
-4. **Il modulo contatti non è mai stato provato contro i servizi veri**, perché le chiavi
+4. **L'area riservata `/admin` è chiesta ma non decisa.** Il proprietario ha
+   chiesto: accesso con credenziali su `/admin`, riordino dei lavori
+   trascinandoli, creazione di lavori e committenti da interfaccia, analytics
+   e l'elenco di chi ha lasciato i contatti. Il modello dei dati è già pronto
+   per riceverla — l'anagrafica dei committenti, i campi facoltativi, il campo
+   `ordine` come rilevanza sono esattamente ciò che un pannello andrebbe a
+   scrivere — ma **l'area in sé richiede una scelta di architettura** che non
+   va presa per conto del proprietario: un CMS su Git (gratuito, resta tutto
+   statico, non dà analytics né i contatti ricevuti), un CMS ospitato (canone
+   mensile), o un'applicazione con database e autenticazione (un progetto
+   diverso). Le tre strade, con costi e conseguenze, sono state messe per
+   iscritto al proprietario; finché non sceglie, il sito resta statico e i
+   contenuti si modificano dai file.
+
+5. **Il modulo contatti non è mai stato provato contro i servizi veri**, perché le chiavi
    non esistono ancora. La logica è coperta da 14 test con mailer e verifica antispam
    mockati; il primo invio reale va provato subito dopo il deploy, controllando che
    arrivino entrambe le email e che la copia al visitatore non finisca nella posta

@@ -62,14 +62,19 @@ export function schemaBriciole(voci: VoceBriciola[], site: URL): Record<string, 
   };
 }
 
+/**
+ * Di un lavoro sono obbligatori solo il titolo e l'abstract: tutto il resto
+ * può mancare, e quello che manca non finisce nei dati strutturati invece di
+ * finirci vuoto. Un campo vuoto in JSON-LD è peggio di un campo assente.
+ */
 export interface DatiOperaProgetto {
   titolo: string;
   descrizioneBreve: string;
-  cliente: string;
-  categoria: string;
-  data: Date;
-  immagine: string;
   percorso: string;
+  committente?: string | undefined;
+  categoria?: string | undefined;
+  data?: Date | undefined;
+  immagine?: string | undefined;
 }
 
 export function schemaProgetto(dati: DatiOperaProgetto, site: URL): Record<string, unknown> {
@@ -81,10 +86,14 @@ export function schemaProgetto(dati: DatiOperaProgetto, site: URL): Record<strin
     headline: dati.titolo,
     description: dati.descrizioneBreve,
     url: new URL(dati.percorso, site).href,
-    image: new URL(dati.immagine, site).href,
-    genre: dati.categoria,
-    dateCreated: dati.data.toISOString().slice(0, 10),
-    datePublished: dati.data.toISOString().slice(0, 10),
+    ...(dati.immagine ? { image: new URL(dati.immagine, site).href } : {}),
+    ...(dati.categoria ? { genre: dati.categoria } : {}),
+    ...(dati.data
+      ? {
+          dateCreated: dati.data.toISOString().slice(0, 10),
+          datePublished: dati.data.toISOString().slice(0, 10),
+        }
+      : {}),
     inLanguage: 'it',
     creator: {
       '@type': 'Organization',
@@ -92,6 +101,6 @@ export function schemaProgetto(dati: DatiOperaProgetto, site: URL): Record<strin
       url: site.href,
       address: indirizzoCompleto,
     },
-    about: dati.cliente,
+    ...(dati.committente ? { about: dati.committente } : {}),
   };
 }

@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { ID_COMMITTENTI } from './lib/committenti';
 
 /**
  * Collection "progetti".
@@ -49,32 +50,65 @@ const disegno = z
 
 export type Disegno = z.infer<typeof disegno>;
 
+/**
+ * Lo schema di un lavoro.
+ *
+ * **Obbligatori sono solo il titolo e l'abstract.** Tutto il resto è
+ * facoltativo, e quello che non viene compilato semplicemente non compare:
+ * niente riquadri vuoti, niente «Cliente: —». È la regola che permette di
+ * pubblicare un lavoro appena si sa qualcosa, e di completarlo dopo.
+ *
+ * Le due eccezioni sono coppie che non hanno senso a metà, e infatti sono
+ * controllate: un'immagine senza il suo testo alternativo (che è un difetto
+ * di accessibilità) e un modello 3D senza anteprima (che senza JavaScript
+ * lascerebbe un buco).
+ */
 const progetti = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/progetti' }),
   schema: z
     .object({
-      /** Titolo del progetto, usato come <h1> della pagina di dettaglio. */
+      /** OBBLIGATORIO. Titolo del lavoro, usato come <h1> della sua pagina. */
       titolo: z.string().min(3).max(120),
-      /** Nome del cliente, oppure "Confidenziale" se non è pubblicabile. */
-      cliente: z.string().min(2).max(80),
-      /** Deve essere uno dei valori di CATEGORIE_PROGETTO. */
-      categoria: z.enum(CATEGORIE_PROGETTO),
-      /** Data di chiusura della commessa, formato AAAA-MM-GG. */
-      data: z.coerce.date(),
-      /** Riassunto per la griglia e per la meta description: massimo 160 caratteri. */
+      /** OBBLIGATORIO. L'abstract: apre la pagina ed è la meta description. */
       descrizioneBreve: z.string().min(20).max(160),
-      /** Percorso dell'immagine dalla root del sito, es. /img/progetti/nome.svg */
-      immagine: z.string().startsWith('/'),
-      /** Testo alternativo descrittivo dell'immagine: obbligatorio. */
-      immagineAlt: z.string().min(10),
-      /** true per mostrare il progetto fra quelli in evidenza in home. */
+
+      /**
+       * I punti chiave, sotto l'abstract: le cose che si devono capire senza
+       * leggere tutto. Frasi brevi, non paragrafi.
+       */
+      puntiChiave: z.array(z.string().min(3).max(140)).max(6).optional(),
+
+      /**
+       * Id di un committente dell'anagrafica (`src/lib/committenti.ts`).
+       * Scrivendone uno che non esiste, la build si ferma e lo dice: è il
+       * modo di non ritrovarsi due grafie dello stesso nome.
+       */
+      committente: z.enum(ID_COMMITTENTI).optional(),
+
+      /** Il tag del lavoro. Uno solo: i tag sono esclusivi per costruzione. */
+      categoria: z.enum(CATEGORIE_PROGETTO).optional(),
+
+      /** Data della commessa, formato AAAA-MM-GG. */
+      data: z.coerce.date().optional(),
+
+      /** Immagine di copertina. Senza, l'anteprima mostra un segnaposto. */
+      immagine: z.string().startsWith('/').optional(),
+      /** Testo alternativo: obbligatorio **se** c'è l'immagine. */
+      immagineAlt: z.string().min(10).optional(),
+
+      /** true per mostrare il lavoro fra quelli in evidenza in home. */
       inEvidenza: z.boolean().default(false),
-      /** Ordine crescente nella griglia; se assente si ordina per data decrescente. */
+      /** Rilevanza: numero crescente. È l'ordine deciso dal proprietario. */
       ordine: z.number().int().positive().optional(),
       /** Tavole e modelli mostrati nel visualizzatore, in fondo alla pagina. */
       disegni: z.array(disegno).max(8).optional(),
     })
-    .strict(),
+    .strict()
+    .refine((valore) => valore.immagine === undefined || valore.immagineAlt !== undefined, {
+      message:
+        "un lavoro con immagine di copertina deve avere anche immagineAlt (la descrizione per chi non vede l'immagine)",
+      path: ['immagineAlt'],
+    }),
 });
 
 export const collections = { progetti };

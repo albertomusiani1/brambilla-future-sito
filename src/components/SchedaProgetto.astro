@@ -1,11 +1,20 @@
 ---
 /**
- * Scheda di un progetto nella griglia. L'intera scheda è cliccabile
- * grazie allo pseudo-elemento sul link del titolo: gli screen reader
- * leggono un solo collegamento.
+ * Scheda di un lavoro nella griglia. L'intera scheda è cliccabile grazie
+ * allo pseudo-elemento sul link del titolo: gli screen reader leggono un
+ * solo collegamento.
+ *
+ * Di un lavoro sono obbligatori solo il titolo e l'abstract. Tutto il resto
+ * — copertina, committente, tag, data — compare **solo se compilato**: una
+ * scheda senza data non mostra «Anno: —», semplicemente non ha la riga.
+ *
+ * Senza copertina la scheda non si accorcia: al suo posto c'è un segnaposto
+ * con la trama a favo, che tiene la stessa proporzione. Così una griglia con
+ * metà dei lavori senza foto resta allineata.
  */
 import type { CollectionEntry } from 'astro:content';
 import { t } from '../i18n';
+import { trovaCommittente } from '../lib/committenti';
 
 export interface Props {
   progetto: CollectionEntry<'progetti'>;
@@ -14,10 +23,11 @@ export interface Props {
 }
 
 const { progetto, prioritaria = false } = Astro.props;
-const { titolo, descrizioneBreve, immagine, immagineAlt, cliente, categoria, data, disegni } =
+const { titolo, descrizioneBreve, immagine, immagineAlt, committente, categoria, data, disegni } =
   progetto.data;
 
-const anno = data.getFullYear();
+const anno = data?.getFullYear();
+const azienda = trovaCommittente(committente);
 const percorso = `/progetti/${progetto.id}`;
 
 /** Se il lavoro porta tavole o modelli lo si dice qui: è il pezzo forte. */
@@ -26,18 +36,35 @@ const conDisegni = (disegni ?? []).length > 0;
 ---
 
 <article class="scheda scheda--collegata squadrato">
-  <div class="scheda__media">
-    <img
-      src={immagine}
-      alt={immagineAlt}
-      width="800"
-      height="500"
-      loading={prioritaria ? 'eager' : 'lazy'}
-      decoding="async"
-    />
-    <p class="scheda__categoria">
-      <span class="etichetta etichetta--chiara">{categoria}</span>
-    </p>
+  <div class:list={['scheda__media', { 'scheda__media--vuota': !immagine }]}>
+    {
+      immagine ? (
+        <img
+          src={immagine}
+          alt={immagineAlt ?? ''}
+          width="800"
+          height="500"
+          loading={prioritaria ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      ) : (
+        <span class="scheda__segnaposto" aria-hidden="true">
+          <span class="esagono scheda__segnaposto-segno">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M4 17l5-6 4 4 3-3 4 5z" stroke-linejoin="round" />
+              <circle cx="9" cy="8" r="1.6" />
+            </svg>
+          </span>
+        </span>
+      )
+    }
+    {
+      categoria && (
+        <p class="scheda__categoria">
+          <span class="etichetta etichetta--chiara">{categoria}</span>
+        </p>
+      )
+    }
     {
       conDisegni && (
         <p class="scheda__bollino">
@@ -55,15 +82,46 @@ const conDisegni = (disegni ?? []).length > 0;
   <div class="scheda__corpo">
     <h3 class="scheda__titolo"><a href={percorso}>{titolo}</a></h3>
     <p class="scheda__testo">{descrizioneBreve}</p>
-    <dl class="scheda__meta">
-      <div>
-        <dt>{t('comune.cliente')}</dt>
-        <dd>{cliente}</dd>
-      </div>
-      <div>
-        <dt>{t('comune.anno')}</dt>
-        <dd>{anno}</dd>
-      </div>
-    </dl>
+    {
+      (azienda || anno) && (
+        <dl class="scheda__meta">
+          {azienda && (
+            <div>
+              <dt>{t('comune.cliente')}</dt>
+              <dd>{azienda.nome}</dd>
+            </div>
+          )}
+          {anno && (
+            <div>
+              <dt>{t('comune.anno')}</dt>
+              <dd>{anno}</dd>
+            </div>
+          )}
+        </dl>
+      )
+    }
   </div>
 </article>
+
+<style>
+  /* Il segnaposto tiene la proporzione dell'immagine che non c'è, così le
+     schede di una riga restano alte uguali. */
+  .scheda__media--vuota {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 10;
+    background-image: var(--trama-esagoni-fitta);
+    background-size: 46px 40px;
+  }
+
+  .scheda__segnaposto-segno {
+    width: 3rem;
+    background-color: rgb(48 147 201 / 16%);
+    color: var(--colore-accento);
+  }
+
+  .scheda__segnaposto-segno svg {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+</style>

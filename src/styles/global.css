@@ -246,6 +246,14 @@ ol[class] {
   list-style: none;
 }
 
+/* `hidden` deve vincere su qualunque `display` dichiarato dopo. Senza questa
+   riga, un elemento con `display: flex` o `display: grid` resta visibile
+   anche quando il JavaScript lo marca nascosto — ed è un difetto che si vede
+   solo a pagina viva, mai leggendo il sorgente. */
+[hidden] {
+  display: none !important;
+}
+
 img,
 svg,
 picture {

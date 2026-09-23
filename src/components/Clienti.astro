@@ -8,7 +8,7 @@
  */
 import IntestazioneSezione from './IntestazioneSezione.astro';
 import { t } from '../i18n';
-import { clienti } from '../lib/clienti';
+import { committentiVisibili } from '../lib/committenti';
 
 export interface Props {
   /** Indice della sezione nella pagina, es. "05". */
@@ -16,6 +16,13 @@ export interface Props {
 }
 
 const { indice = '01' } = Astro.props;
+
+/**
+ * Solo i committenti marcati `visibile: true` nell'anagrafica. Gli altri
+ * restano nella scheda del loro lavoro e non compaiono qui: è la differenza
+ * fra «abbiamo lavorato per loro» e «possiamo dirlo».
+ */
+const clienti = committentiVisibili();
 
 /**
  * Sigla di ripiego finché non arriva il marchio.

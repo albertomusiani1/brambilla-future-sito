@@ -1,9 +1,13 @@
 ---
 titolo: Revisione di pompe per vuoto
-cliente: Utilizzatore finale, settore alimentare
+committente: officina-meccanica
 categoria: Revisione
 data: 2025-05-09
 descrizioneBreve: "Smontaggio, verifica dell'usura, sostituzione delle parti consumate e prova funzionale prima del rientro in linea di un gruppo di pompe per vuoto."
+puntiChiave:
+  - Pompe smontate, misurate e riprovate prima di tornare in linea
+  - Sala test attrezzata per il vuoto
+  - Verbale di prova consegnato insieme alla pompa
 immagine: /img/progetti/revisione-pompe-vuoto.svg
 immagineAlt: Schema di una pompa per vuoto con albero in blu e, accanto, un manometro con il settore di lavoro evidenziato.
 inEvidenza: true

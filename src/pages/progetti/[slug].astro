@@ -7,6 +7,7 @@ import SchedaProgetto from '../../components/SchedaProgetto.astro';
 import VisualizzatoreDisegni from '../../components/VisualizzatoreDisegni.astro';
 import { t } from '../../i18n';
 import { azienda } from '../../lib/azienda';
+import { trovaCommittente } from '../../lib/committenti';
 import { schemaProgetto } from '../../lib/schema';
 import { componiDescrizione, validaTitolo } from '../../lib/seo';
 
@@ -23,31 +24,59 @@ interface Props {
 }
 
 const { progetto } = Astro.props;
-const { titolo, cliente, categoria, data, descrizioneBreve, immagine, immagineAlt, disegni } =
-  progetto.data;
+const {
+  titolo,
+  committente,
+  categoria,
+  data,
+  descrizioneBreve,
+  puntiChiave,
+  immagine,
+  immagineAlt,
+  disegni,
+} = progetto.data;
 
 const { Content } = await render(progetto);
 
 const site = Astro.site ?? new URL('http://localhost:4321');
 const percorso = `/progetti/${progetto.id}`;
+const commessa = trovaCommittente(committente);
 
-const dataLeggibile = new Intl.DateTimeFormat('it-IT', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-}).format(data);
+const dataLeggibile = data
+  ? new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }).format(data)
+  : undefined;
 
 const titoloSeo = validaTitolo(titolo, percorso);
-const descrizioneSeo = componiDescrizione(
-  descrizioneBreve,
-  `Progetto di ${categoria.toLowerCase()} realizzato da ${azienda.nome} per ${cliente}.`,
-  percorso
-);
+/**
+ * La coda della descrizione si compone con quello che c'è: di un lavoro può
+ * mancare tutto tranne titolo e abstract, e una frase con dei buchi dentro è
+ * peggio di una frase più corta.
+ */
+const coda = [
+  categoria ? `Lavoro di ${categoria.toLowerCase()}` : 'Lavoro',
+  `realizzato da ${azienda.nome}`,
+  commessa ? `per ${commessa.nome}` : null,
+]
+  .filter(Boolean)
+  .join(' ');
+const descrizioneSeo = componiDescrizione(descrizioneBreve, `${coda}.`, percorso);
 
-const altri = (await getCollection('progetti'))
-  .filter((p) => p.id !== progetto.id)
-  .sort((a, b) => b.data.data.getTime() - a.data.data.getTime())
-  .slice(0, 3);
+/**
+ * Lavori simili: quelli che portano lo stesso tag, i più recenti per primi.
+ * Se non bastano a fare tre schede si completa con gli altri lavori, perché
+ * una riga con una scheda sola sembra un errore.
+ */
+const tutti = (await getCollection('progetti')).filter((p) => p.id !== progetto.id);
+const perData = (a: CollectionEntry<'progetti'>, b: CollectionEntry<'progetti'>) =>
+  (b.data.data?.getTime() ?? 0) - (a.data.data?.getTime() ?? 0);
+
+const conStessoTag = categoria
+  ? tutti.filter((p) => p.data.categoria === categoria).sort(perData)
+  : [];
+const simili = [
+  ...conStessoTag,
+  ...tutti.filter((p) => !conStessoTag.includes(p)).sort(perData),
+].slice(0, 3);
 ---
 
 <BaseLayout
@@ -55,21 +84,32 @@ const altri = (await getCollection('progetti'))
   descrizione={descrizioneSeo}
   immagine={immagine}
   tipo="article"
-  pubblicatoIl={data.toISOString()}
+  pubblicatoIl={data?.toISOString()}
   briciole={[{ etichetta: t('nav.progetti'), href: '/progetti' }, { etichetta: titolo }]}
   jsonLd={[
     schemaProgetto(
-      { titolo, descrizioneBreve, cliente, categoria, data, immagine, percorso },
+      { titolo, descrizioneBreve, committente: commessa?.nome, categoria, data, immagine, percorso },
       site
     ),
   ]}
 >
   <article class="sezione progetto">
     <div class="contenitore">
+      {/* La pagina si apre sul titolo, non su un'immagine: quello che dice
+          di che lavoro si tratta è il testo. La copertina, se c'è, arriva
+          dopo i punti chiave e prima del tag. */}
       <header class="progetto__testata rivela">
-        <p><span class="etichetta etichetta--accento">{categoria}</span></p>
         <h1>{titolo}</h1>
         <p class="progetto__sommario">{descrizioneBreve}</p>
+        {
+          puntiChiave && puntiChiave.length > 0 && (
+            <ul class="progetto__punti">
+              {puntiChiave.map((punto) => (
+                <li>{punto}</li>
+              ))}
+            </ul>
+          )
+        }
         {
           disegni && disegni.length > 0 && (
             <p class="progetto__vai-disegni">
@@ -81,30 +121,48 @@ const altri = (await getCollection('progetti'))
         }
       </header>
 
-      <img
-        class="progetto__immagine"
-        src={immagine}
-        alt={immagineAlt}
-        width="800"
-        height="500"
-        decoding="async"
-      />
+      {
+        immagine && (
+          <img
+            class="progetto__immagine"
+            src={immagine}
+            alt={immagineAlt ?? ''}
+            width="800"
+            height="500"
+            decoding="async"
+          />
+        )
+      }
 
       <div class="progetto__contenuto">
-        <dl class="progetto__dati">
-          <div>
-            <dt>{t('comune.cliente')}</dt>
-            <dd>{cliente}</dd>
-          </div>
-          <div>
-            <dt>{t('comune.categoria')}</dt>
-            <dd>{categoria}</dd>
-          </div>
-          <div>
-            <dt>{t('comune.data')}</dt>
-            <dd><time datetime={data.toISOString().slice(0, 10)}>{dataLeggibile}</time></dd>
-          </div>
-        </dl>
+        {
+          (commessa || categoria || dataLeggibile) && (
+            <dl class="progetto__dati">
+              {commessa && (
+                <div>
+                  <dt>{t('comune.cliente')}</dt>
+                  <dd>{commessa.nome}</dd>
+                </div>
+              )}
+              {categoria && (
+                <div>
+                  <dt>{t('comune.categoria')}</dt>
+                  <dd>
+                    <span class="etichetta etichetta--accento">{categoria}</span>
+                  </dd>
+                </div>
+              )}
+              {data && dataLeggibile && (
+                <div>
+                  <dt>{t('comune.data')}</dt>
+                  <dd>
+                    <time datetime={data.toISOString().slice(0, 10)}>{dataLeggibile}</time>
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )
+        }
 
         <div class="prosa">
           <Content />
@@ -120,19 +178,28 @@ const altri = (await getCollection('progetti'))
 
   {disegni && disegni.length > 0 && <VisualizzatoreDisegni disegni={disegni} indice="02" />}
 
-  <section class="sezione" aria-labelledby="titolo-altri-progetti">
-    <div class="contenitore">
-      <IntestazioneSezione
-        indice={disegni && disegni.length > 0 ? '03' : '02'}
-        etichetta={t('nav.progetti')}
-        titolo={t('progetti.altriProgetti')}
-        id="titolo-altri-progetti"
-      />
-      <ul class="griglia griglia--2 griglia--3 elenco-altri">
-        {altri.map((altro) => <li><SchedaProgetto progetto={altro} /></li>)}
-      </ul>
-    </div>
-  </section>
+  {
+    simili.length > 0 && (
+      <section class="sezione" aria-labelledby="titolo-lavori-simili">
+        <div class="contenitore">
+          <IntestazioneSezione
+            indice={disegni && disegni.length > 0 ? '03' : '02'}
+            etichetta={categoria ?? t('nav.progetti')}
+            titolo={t('progetti.lavoriSimili')}
+            testo={categoria ? t('progetti.lavoriSimiliSottotitolo') : undefined}
+            id="titolo-lavori-simili"
+          />
+          <ul class="griglia griglia--2 griglia--3 elenco-altri">
+            {simili.map((altro) => (
+              <li>
+                <SchedaProgetto progetto={altro} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
 </BaseLayout>
 
 <style>
@@ -143,6 +210,35 @@ const altri = (await getCollection('progetti'))
 
   .progetto__testata h1 {
     margin-top: var(--space-3);
+  }
+
+  /* I punti chiave: quello che si deve capire senza leggere tutto.
+     Esagono davanti, come gli elenchi tecnici del resto del sito. */
+  .progetto__punti {
+    display: grid;
+    gap: var(--space-3);
+    max-width: var(--misura);
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .progetto__punti li {
+    display: grid;
+    grid-template-columns: 0.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+    font-size: var(--testo-sm);
+    color: var(--colore-testo);
+  }
+
+  .progetto__punti li::before {
+    content: '';
+    width: 0.5rem;
+    height: calc(0.5rem / var(--esagono-proporzione));
+    background-color: var(--marchio-blu);
+    clip-path: var(--esagono);
+    transform: translateY(0.15em);
   }
 
   .progetto__sommario {

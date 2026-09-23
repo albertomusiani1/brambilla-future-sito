@@ -1,9 +1,12 @@
 ---
 titolo: Montaggio di componenti per accumulatori
-cliente: Costruttore di accumulatori oleodinamici
+committente: oleodinamica
 categoria: Montaggio
 data: 2025-03-03
 descrizioneBreve: "Assemblaggio di componenti meccanici per accumulatori oleodinamici, su serie ripetute e con i controlli concordati con il costruttore."
+puntiChiave:
+  - Progettazione su specifica del costruttore
+  - Vincoli di pressione e sicurezza fissati a monte
 immagine: /img/progetti/accumulatori-oleodinamici.svg
 immagineAlt: Schema in sezione di un accumulatore oleodinamico con il volume di fluido campito in azzurro e gli attacchi sopra e sotto.
 ---

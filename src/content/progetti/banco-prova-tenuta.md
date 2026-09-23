@@ -1,9 +1,11 @@
 ---
 titolo: Prova di tenuta su gruppi a vuoto
-cliente: Non divulgabile
 categoria: Collaudo
 data: 2025-04-14
 descrizioneBreve: "Prove di tenuta in sala test su gruppi destinati al farmaceutico, eseguite in officina prima della partenza verso lo stabilimento di destinazione."
+puntiChiave:
+  - Banco costruito attorno alla prova che doveva fare
+  - Committenza non divulgabile, lavoro raccontabile
 immagine: /img/progetti/banco-prova-tenuta.svg
 immagineAlt: Schema di un recipiente collegato attraverso una valvola a uno strumento di misura, con il livello indicato da tre segni blu.
 disegni:

@@ -5,13 +5,23 @@ import SchedaProgetto from '../components/SchedaProgetto.astro';
 import PercorsoLavori from '../components/PercorsoLavori.astro';
 import { getCollection } from 'astro:content';
 import { CATEGORIE_PROGETTO } from '../content.config';
+import Clienti from '../components/Clienti.astro';
 import { t } from '../i18n';
+import { committenti, trovaCommittente } from '../lib/committenti';
+
+/**
+ * L'ordine di serie è la **rilevanza**: il numero `ordine` deciso dal
+ * proprietario. A parità, e per i lavori che non ce l'hanno, vale la data
+ * della commessa, dalla più recente. Un lavoro senza data finisce in fondo,
+ * non in cima: l'assenza di un dato non è una data del 1970.
+ */
+const tempo = (d: Date | undefined) => d?.getTime() ?? 0;
 
 const progetti = (await getCollection('progetti')).sort((a, b) => {
   const ordineA = a.data.ordine ?? Number.MAX_SAFE_INTEGER;
   const ordineB = b.data.ordine ?? Number.MAX_SAFE_INTEGER;
   if (ordineA !== ordineB) return ordineA - ordineB;
-  return b.data.data.getTime() - a.data.data.getTime();
+  return tempo(b.data.data) - tempo(a.data.data);
 });
 
 /** Solo le categorie che hanno almeno un progetto pubblicato. */
@@ -30,6 +40,14 @@ const disegni = progetti.flatMap((progetto) => progetto.data.disegni ?? []).slic
 /** Identificatore CSS/HTML sicuro per una categoria. */
 const idCategoria = (categoria: string) =>
   `categoria-${categoria.toLowerCase().normalize('NFD').replace(/[^a-z]/g, '')}`;
+
+/** Solo i committenti che hanno almeno un lavoro pubblicato. */
+const committentiUsati = committenti.filter((c) =>
+  progetti.some((p) => p.data.committente === c.id)
+);
+
+/** Quanti lavori per pagina: tre righe da tre schede. */
+const PER_PAGINA = 9;
 ---
 
 <BaseLayout
@@ -52,57 +70,161 @@ const idCategoria = (categoria: string) =>
         progetti.length === 0 ? (
           <p>{t('progetti.nessunProgetto')}</p>
         ) : (
-          <div class="filtro-progetti">
-            <fieldset class="filtro">
-              <legend class="filtro__titolo">{t('comune.filtraPerCategoria')}</legend>
-              <div class="filtro__voci">
-                <input
-                  class="solo-screen-reader filtro__radio"
-                  type="radio"
-                  name="categoria"
-                  id="categoria-tutte"
-                  value="tutte"
-                  checked
-                />
-                <label class="filtro__etichetta" for="categoria-tutte">
-                  {t('comune.tutteLeCategorie')}
-                </label>
-                {categorieUsate.map((categoria) => (
-                  <>
+          <div class="filtro-progetti" data-filtro-lavori data-per-pagina={String(PER_PAGINA)}>
+            {/* Il pannello è un <details>: si apre e si chiude senza una riga
+                di JavaScript, e senza JavaScript resta aperto e funzionante
+                il filtro per tag, che è quello che serve davvero. */}
+            <details class="pannello-filtri">
+              <summary class="pannello-filtri__apri">
+                <span class="pannello-filtri__icona" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 6h16M7 12h10M10 18h4" stroke-linecap="round" />
+                  </svg>
+                </span>
+                {t('comune.filtri')}
+                <span class="pannello-filtri__conto" data-conto-filtri hidden />
+              </summary>
+
+              <div class="pannello-filtri__corpo">
+                <fieldset class="filtro">
+                  <legend class="filtro__titolo">{t('comune.filtraPerTag')}</legend>
+                  <div class="filtro__voci">
                     <input
                       class="solo-screen-reader filtro__radio"
                       type="radio"
                       name="categoria"
-                      id={idCategoria(categoria)}
-                      value={categoria}
+                      id="categoria-tutte"
+                      value=""
+                      checked
                     />
-                    <label class="filtro__etichetta" for={idCategoria(categoria)}>
-                      {categoria}
+                    <label class="filtro__etichetta" for="categoria-tutte">
+                      {t('comune.tutteLeCategorie')}
                     </label>
-                  </>
-                ))}
+                    {categorieUsate.map((categoria) => (
+                      <>
+                        <input
+                          class="solo-screen-reader filtro__radio"
+                          type="radio"
+                          name="categoria"
+                          id={idCategoria(categoria)}
+                          value={categoria}
+                        />
+                        <label class="filtro__etichetta" for={idCategoria(categoria)}>
+                          {categoria}
+                        </label>
+                      </>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="filtro filtro--con-js">
+                  <legend class="filtro__titolo">{t('comune.filtraPerCommittente')}</legend>
+                  <div class="filtro__voci">
+                    <input
+                      class="solo-screen-reader filtro__radio"
+                      type="radio"
+                      name="committente"
+                      id="committente-tutti"
+                      value=""
+                      checked
+                    />
+                    <label class="filtro__etichetta" for="committente-tutti">
+                      {t('comune.tuttiICommittenti')}
+                    </label>
+                    {committentiUsati.map((commessa) => (
+                      <>
+                        <input
+                          class="solo-screen-reader filtro__radio"
+                          type="radio"
+                          name="committente"
+                          id={`committente-${commessa.id}`}
+                          value={commessa.id}
+                        />
+                        <label class="filtro__etichetta" for={`committente-${commessa.id}`}>
+                          {commessa.nome}
+                        </label>
+                      </>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="filtro filtro--con-js">
+                  <legend class="filtro__titolo">{t('comune.ordinaPer')}</legend>
+                  <div class="filtro__voci">
+                    <input
+                      class="solo-screen-reader filtro__radio"
+                      type="radio"
+                      name="ordine"
+                      id="ordine-rilevanza"
+                      value="rilevanza"
+                      checked
+                    />
+                    <label class="filtro__etichetta" for="ordine-rilevanza">
+                      {t('comune.ordineRilevanza')}
+                    </label>
+                    <input
+                      class="solo-screen-reader filtro__radio"
+                      type="radio"
+                      name="ordine"
+                      id="ordine-data"
+                      value="data"
+                    />
+                    <label class="filtro__etichetta" for="ordine-data">
+                      {t('comune.ordineData')}
+                    </label>
+                  </div>
+                </fieldset>
+
+                <button class="bottone bottone--secondario filtro__azzera filtro--con-js" type="button" data-azzera>
+                  {t('comune.azzeraFiltri')}
+                </button>
               </div>
-            </fieldset>
+            </details>
 
             {/* Titolo di livello 2 fra l'h1 della pagina e gli h3 delle
                 schede: senza, la gerarchia salta un gradino e chi naviga per
                 intestazioni non trova l'elenco. Non serve vederlo. */}
             <h2 class="solo-screen-reader">{t('progetti.elencoTitolo')}</h2>
 
-            <ul class="griglia griglia--2 griglia--3 elenco-progetti">
+            <ul class="griglia griglia--2 griglia--3 elenco-progetti" data-elenco>
               {progetti.map((progetto, indice) => (
-                <li class="rivela" data-categoria={progetto.data.categoria}>
+                <li
+                  class="rivela"
+                  data-categoria={progetto.data.categoria}
+                  data-committente={progetto.data.committente}
+                  data-rilevanza={String(progetto.data.ordine ?? 9999)}
+                  data-data={progetto.data.data?.toISOString().slice(0, 10) ?? ''}
+                >
                   <SchedaProgetto progetto={progetto} prioritaria={indice < 2} />
                 </li>
               ))}
             </ul>
+
+            <p class="elenco-vuoto" data-nessun-risultato hidden>
+              {t('progetti.nessunRisultato')}
+            </p>
+
+            <nav class="paginazione" aria-label={t('comune.paginazione')} data-paginazione hidden />
+
+            {/* I testi dell'isola viaggiano in attributi data-*: restano in
+                it.json e non finiscono scritti dentro il JavaScript. */}
+            <span
+              class="solo-screen-reader"
+              data-testi-filtro
+              data-precedente={t('comune.paginaPrecedente')}
+              data-successiva={t('comune.paginaSuccessiva')}
+              data-vai-alla-pagina={t('comune.vaiAllaPagina')}
+              data-filtri-attivi={t('comune.filtriAttivi')}
+            />
           </div>
         )
       }
     </div>
   </section>
 
-  <PercorsoLavori disegni={disegni} indice="02" />
+  <Clienti indice="02" />
+
+  <PercorsoLavori disegni={disegni} indice="03" />
 </BaseLayout>
 
 <style>
@@ -179,18 +301,169 @@ const idCategoria = (categoria: string) =>
     width: 100%;
   }
 
-  .filtro-progetti:has(#categoria-progettazione:checked)
+  /* Ricaduta senza JavaScript: i radio dei tag pilotano la visibilità delle
+     schede con :has(). Le regole sono scritte a mano una per tag — una CSP
+     senza 'unsafe-inline' non lascia altra strada — e si spengono appena
+     l'isola prende il comando, marcando il contenitore con `data-js`. */
+  .filtro-progetti:not([data-js]):has(#categoria-progettazione:checked)
     .elenco-progetti
     > li:not([data-categoria='Progettazione']),
-  .filtro-progetti:has(#categoria-produzione:checked)
+  .filtro-progetti:not([data-js]):has(#categoria-montaggio:checked)
     .elenco-progetti
-    > li:not([data-categoria='Produzione']),
-  .filtro-progetti:has(#categoria-validazione:checked)
+    > li:not([data-categoria='Montaggio']),
+  .filtro-progetti:not([data-js]):has(#categoria-revisione:checked)
     .elenco-progetti
-    > li:not([data-categoria='Validazione']),
-  .filtro-progetti:has(#categoria-elettrificazione:checked)
+    > li:not([data-categoria='Revisione']),
+  .filtro-progetti:not([data-js]):has(#categoria-collaudo:checked)
     .elenco-progetti
-    > li:not([data-categoria='Elettrificazione']) {
+    > li:not([data-categoria='Collaudo']) {
     display: none;
   }
+
+  /* Committente e ordinamento vogliono un calcolo: senza JavaScript non
+     sarebbero comandi, sarebbero bottoni finti. Compaiono solo quando c'è
+     qualcuno che li sa eseguire. */
+  .filtro--con-js {
+    display: none;
+  }
+
+  .filtro-progetti[data-js] .filtro--con-js {
+    display: revert;
+  }
+
+  /* Il pannello dei filtri: un <details>, quindi si apre e si chiude da solo.
+     Senza JavaScript resta chiuso ma apribile, e dentro c'è il filtro per tag
+     che funziona lo stesso. */
+  .pannello-filtri {
+    margin-bottom: var(--space-6);
+    border: 1px solid var(--colore-bordo);
+    border-radius: var(--raggio);
+    background-color: var(--colore-superficie);
+    background-image: var(--lucido);
+  }
+
+  .pannello-filtri__apri {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    color: var(--colore-titolo);
+    font-family: var(--font-mono);
+    font-size: var(--testo-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracciatura-etichetta);
+    text-transform: uppercase;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .pannello-filtri__apri::-webkit-details-marker {
+    display: none;
+  }
+
+  .pannello-filtri__apri:hover {
+    color: var(--colore-accento);
+  }
+
+  .pannello-filtri__icona svg {
+    display: block;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  /* La freccia che gira: dice se il pannello è aperto o chiuso. */
+  .pannello-filtri__apri::after {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-left: auto;
+    border-right: 2px solid currentcolor;
+    border-bottom: 2px solid currentcolor;
+    transform: rotate(45deg) translate(-2px, -2px);
+    transition: transform var(--transizione);
+  }
+
+  .pannello-filtri[open] .pannello-filtri__apri::after {
+    transform: rotate(-135deg) translate(-2px, -2px);
+  }
+
+  /* Quanti filtri sono attivi, in una pastiglia: aperto o chiuso che sia il
+     pannello, si vede che l'elenco non è completo. */
+  .pannello-filtri__conto {
+    display: grid;
+    place-items: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding-inline: 0.35rem;
+    border-radius: 999px;
+    background-color: var(--marchio-blu);
+    color: var(--colore-su-accento);
+    font-size: 0.6875rem;
+  }
+
+  .pannello-filtri__corpo {
+    padding: 0 var(--space-5) var(--space-5);
+    border-top: 1px solid var(--colore-bordo);
+    padding-top: var(--space-5);
+  }
+
+  .pannello-filtri__corpo .filtro:last-of-type {
+    margin-bottom: var(--space-5);
+  }
+
+  .filtro__azzera {
+    min-height: 2.25rem;
+    padding-block: var(--space-2);
+  }
+
+  .elenco-vuoto {
+    padding: var(--space-7) 0;
+    color: var(--colore-testo-tenue);
+    text-align: center;
+  }
+
+  /* Impaginazione: tre righe da tre schede per pagina. */
+  .paginazione {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-7);
+  }
+
+  .paginazione__voce {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    padding: var(--space-2) var(--space-3);
+    background-color: transparent;
+    border: 1px solid var(--colore-bordo-forte);
+    border-radius: var(--raggio);
+    color: var(--colore-testo);
+    font-family: var(--font-mono);
+    font-size: var(--testo-sm);
+    cursor: pointer;
+    transition: background-color var(--transizione), border-color var(--transizione);
+  }
+
+  .paginazione__voce:hover:not([disabled]) {
+    border-color: var(--colore-accento);
+    color: var(--colore-accento);
+  }
+
+  .paginazione__voce--corrente {
+    background-color: var(--marchio-blu);
+    border-color: var(--marchio-blu);
+    color: var(--colore-su-accento);
+  }
+
+  .paginazione__voce[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
 </style>
+
+<script>
+  // Il codice sta in un modulo separato: così Astro lo emette come file
+  // esterno e la Content-Security-Policy può restare senza 'unsafe-inline'.
+  import '../scripts/filtro-lavori.ts';
+</script>

@@ -36,6 +36,11 @@ const ISOLE = [
     pagine: /^\/$/,
   },
   {
+    nome: 'progetti',
+    perche: 'filtra per tag e committente, ordina e impagina le schede dei lavori',
+    pagine: /^\/progetti$/,
+  },
+  {
     nome: 'FormContatti',
     perche: 'invia il modulo senza ricaricare la pagina',
     pagine: /^\/contatti$/,

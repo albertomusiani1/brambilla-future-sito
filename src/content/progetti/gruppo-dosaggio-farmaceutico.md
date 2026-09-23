@@ -1,9 +1,13 @@
 ---
 titolo: Gruppo di dosaggio per macchina farmaceutica
-cliente: Costruttore di macchine automatiche, settore farmaceutico
+committente: costruttore-farmaceutico
 categoria: Progettazione
 data: 2025-06-18
 descrizioneBreve: "Progettazione di un gruppo di dosaggio volumetrico: modello 3D, tavole di fabbricazione e distinta base, con i vincoli di pulibilità del settore."
+puntiChiave:
+  - Ingombro e sequenza di smontaggio fissati con il cliente prima di aprire il CAD
+  - Superfici raggiungibili e nessun angolo morto, come chiede il farmaceutico
+  - Consegnati modello 3D, tavole di fabbricazione e distinta base
 immagine: /img/progetti/gruppo-dosaggio-farmaceutico.svg
 immagineAlt: Schema tecnico di un cilindro di dosaggio con pistone evidenziato in blu, asse di simmetria tratteggiato e freccia di mandata.
 inEvidenza: true

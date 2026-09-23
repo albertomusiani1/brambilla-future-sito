@@ -2,7 +2,7 @@
 
 Sito statico in **Astro** per PROJECTUNE di Matteuzzi Davide, progettazione
 meccanica, montaggi e revisioni a Castel Maggiore (BO). Italiano, sobrio, senza
-framework CSS e con il JavaScript confinato in tre isole dichiarate.
+framework CSS e con il JavaScript confinato in quattro isole dichiarate.
 
 - **Palette e marchio del cliente**: antracite `#303435` e blu `#3093C9`, i due
   colori del logo, con i file SVG ricavati dal PDF originale (`npm run logo`).
@@ -42,13 +42,15 @@ script non dichiarato.
 7. [Il marchio](#il-marchio)
 8. [Il sistema grafico](#il-sistema-grafico)
 9. [I due temi](#i-due-temi)
-10. [Il percorso nella pagina Lavori](#il-percorso-nella-pagina-lavori)
-11. [I clienti in fondo alla home](#i-clienti-in-fondo-alla-home)
-12. [Come funziona il modulo contatti](#come-funziona-il-modulo-contatti)
-13. [Come cambiare fornitore di posta](#come-cambiare-fornitore-di-posta)
-14. [Come aggiungere l'inglese](#come-aggiungere-linglese)
-15. [Deploy su Netlify](#deploy-su-netlify)
-16. [Verifiche](#verifiche)
+10. [La pagina Lavori: filtri, ordine, pagine](#la-pagina-lavori-filtri-ordine-pagine)
+11. [La pagina Servizi](#la-pagina-servizi)
+12. [Il percorso nella pagina Lavori](#il-percorso-nella-pagina-lavori)
+13. [I committenti: un'anagrafica sola](#i-committenti-unanagrafica-sola)
+14. [Come funziona il modulo contatti](#come-funziona-il-modulo-contatti)
+15. [Come cambiare fornitore di posta](#come-cambiare-fornitore-di-posta)
+16. [Come aggiungere l'inglese](#come-aggiungere-linglese)
+17. [Deploy su Netlify](#deploy-su-netlify)
+18. [Verifiche](#verifiche)
 
 ---
 
@@ -81,7 +83,7 @@ l'invio del modulo non funziona.
 | `npm test` | Test del modulo contatti (non serve nessuna chiave) |
 | `npm run check:pages` | Tutte le URL della sitemap rispondono 200 e la 404 è quella del sito |
 | `npm run check:i18n` | Nessuna stringa di interfaccia scritta a mano nei componenti |
-| `npm run check:js` | Nessuno script fuori dalle tre isole dichiarate |
+| `npm run check:js` | Nessuno script fuori dalle quattro isole dichiarate |
 | `npm run check:responsive` | Screenshot a 360, 768 e 1280 px e controllo overflow |
 | `npm run check:html` | Validazione HTML di `dist/` |
 | `npm run check:links` | Nessun collegamento interno rotto |
@@ -129,7 +131,7 @@ terminale.
     ├── marchio/              Gli SVG del logo, prodotti da `npm run logo`
     ├── lib/processo.ts       I quattro passi della sezione «Come lavoriamo»
     ├── pages/                Una pagina per file (robots.txt incluso, generato)
-    ├── scripts/              Le tre isole JavaScript inviate al browser
+    ├── scripts/              Le quattro isole JavaScript inviate al browser
     └── styles/global.css     Palette, tipografia, spaziature, componenti
 ```
 
@@ -154,40 +156,58 @@ Non serve toccare nessun altro file.
 
 ```markdown
 ---
-# ↓ Fra i due "---" ci sono i dati del progetto. Questa parte è obbligatoria.
+# ↓ Fra i due "---" ci sono i dati del lavoro.
+# OBBLIGATORI SONO SOLO DUE: titolo e descrizioneBreve.
+# Tutto il resto è facoltativo, e quello che non scrivi non compare:
+# niente "Cliente: —", niente riquadri vuoti.
 
-# Titolo del progetto. Diventa il titolo della pagina e il titolo nella scheda.
+# OBBLIGATORIO. Titolo del lavoro: titolo della pagina e della scheda.
 # Massimo 60 caratteri: oltre, la build si ferma e lo dice (limite SEO).
 titolo: Collettore di scarico in acciaio inox
 
-# Il committente. Se il nome non è pubblicabile si scrive che tipo di
-# azienda è, per esempio: Costruttore di macchine automatiche, settore Pharma
-cliente: Officine Barattieri
-
-# Deve essere ESATTAMENTE uno di questi quattro valori:
-#   Progettazione · Montaggio · Revisione · Collaudo
-# Per aggiungerne uno nuovo si modifica CATEGORIE_PROGETTO in src/content.config.ts
-categoria: Montaggio
-
-# Data di chiusura della commessa, sempre nel formato AAAA-MM-GG.
-data: 2026-02-10
-
-# Riassunto mostrato nella scheda e usato come descrizione per Google.
+# OBBLIGATORIO. L'abstract: apre la pagina ed è la descrizione per Google.
 # Fra 120 e 160 caratteri. Le virgolette servono se il testo contiene ":".
 descrizioneBreve: "Fornitura di 12.000 collettori l'anno, con saldatura orbitale certificata e prova di tenuta su ogni pezzo prima della spedizione."
 
-# Percorso dell'immagine, che parte sempre da "/" (cioè dalla cartella public).
+# --- da qui in giù è tutto facoltativo ---
+
+# I punti chiave, mostrati sotto l'abstract: le cose che si devono capire
+# senza leggere tutta la scheda. Frasi brevi, al massimo sei.
+puntiChiave:
+  - Saldatura orbitale certificata su ogni giunto
+  - Prova di tenuta su tutti i pezzi prima della spedizione
+  - Serie annuale da 12.000 unità
+
+# Il committente: l'ID di una voce di src/lib/committenti.ts, NON il nome.
+# Scrivendo un id che lì non esiste, la build si ferma e lo dice.
+# Se il committente non c'è ancora, lo si aggiunge prima a quel file.
+committente: officine-barattieri
+
+# Il tag del lavoro. Uno solo — i tag sono esclusivi — e deve essere
+# ESATTAMENTE uno di questi quattro valori:
+#   Progettazione · Montaggio · Revisione · Collaudo
+# Per aggiungerne uno si modifica CATEGORIE_PROGETTO in src/content.config.ts
+categoria: Montaggio
+
+# Data della commessa, sempre nel formato AAAA-MM-GG.
+# Serve all'ordinamento "per data". Senza, il lavoro finisce in fondo.
+data: 2026-02-10
+
+# Immagine di copertina, con il percorso che parte da "/" (cioè da public/).
+# Senza, la scheda mostra un segnaposto della stessa altezza: la griglia
+# resta allineata e la pagina del lavoro semplicemente non ha l'immagine.
 immagine: /img/progetti/collettore-acciaio-inox.svg
 
-# Descrizione dell'immagine per chi non la vede. Obbligatoria, almeno 10 caratteri.
+# Descrizione dell'immagine per chi non la vede.
+# Obbligatoria SE c'è l'immagine, almeno 10 caratteri.
 # Va descritto che cosa si vede, non ripetuto il titolo.
 immagineAlt: Disegno schematico di un collettore di scarico a quattro condotti convergenti in un unico tubo di uscita.
 
-# true = il progetto compare fra quelli in evidenza in home. Facoltativo (predefinito false).
+# true = il lavoro compare fra quelli in evidenza in home (predefinito false).
 inEvidenza: false
 
-# Posizione nella griglia, numeri più bassi vengono prima. Facoltativo:
-# senza questo campo il progetto si ordina per data, dal più recente.
+# La RILEVANZA: numeri più bassi vengono prima. È l'ordine di serie della
+# pagina Lavori. Senza, il lavoro si ordina per data, dal più recente.
 ordine: 7
 ---
 
@@ -211,15 +231,18 @@ Ultima sezione.
 ### Se qualcosa è sbagliato
 
 La build si ferma con un messaggio che dice **quale file** e **quale campo**. Per
-esempio, togliendo `cliente`:
+esempio, togliendo `descrizioneBreve`:
 
 ```
 [InvalidContentEntryDataError] progetti → nuova-commessa data does not match collection schema.
-  cliente: Required
+  descrizioneBreve: Required
   Location: src/content/progetti/nuova-commessa.md
 ```
 
-È voluto: meglio accorgersene subito che pubblicare una scheda a metà.
+Lo stesso succede scrivendo un `committente` che non esiste nell'anagrafica, o
+mettendo un'immagine senza il suo `immagineAlt`. È voluto: meglio accorgersene
+subito che pubblicare una scheda a metà — o senza il testo alternativo, che è
+un difetto di accessibilità che nessuno nota finché non è troppo tardi.
 
 ---
 
@@ -236,7 +259,7 @@ mandato: sono poche e sono tutte elencate qui.
 | **Via e CAP** della sede di Castel Maggiore | `src/lib/azienda.ts`, campi `indirizzo.via` e `indirizzo.cap`, oggi vuoti e segnati `DA COMPLETARE` |
 | **Foto dei lavori** (progettazione e montaggi) | `public/img/progetti/`, poi il campo `immagine` nel file `.md` del lavoro |
 | **Testi veri dei lavori** | `src/content/progetti/*.md`: le sei schede di oggi sono esempi coerenti con quello che sapete fare, non commesse realmente svolte |
-| **Marchi dei clienti** | `public/img/clienti/`, poi il campo `logo` in `src/lib/clienti.ts` (vedi più sotto) |
+| **Marchi dei committenti** | `public/img/clienti/`, poi il campo `logo` in `src/lib/committenti.ts` (vedi più sotto) |
 | **Dominio definitivo** | `astro.config.mjs`, costante `DOMINIO_DEFINITIVO` |
 | **Chiavi di posta e antispam** | Variabili d'ambiente su Netlify (vedi più sotto) |
 
@@ -284,7 +307,7 @@ L'ordine di precedenza è: variabile `SITE_URL` se la imposti tu → variabile
 |---|---|
 | `src/i18n/it.json` | Tutte le etichette, i titoli di sezione, i messaggi del modulo, i titoli e le descrizioni per Google |
 | `src/lib/servizi.ts` | I quattro servizi: titolo, sommario, descrizione estesa, elenco «che cosa comprende» |
-| `src/lib/clienti.ts` | Le aziende mostrate in fondo alla home |
+| `src/lib/committenti.ts` | L'anagrafica dei committenti: nome, marchio, e se compaiono fra le referenze |
 | `src/lib/testi-legali.ts` | Privacy policy e cookie policy — **da far verificare a chi tratta i dati** |
 | `src/pages/chi-siamo.astro` | Storia, credo, persone, officina (blocchi `storia`, `valori`, `persone`, `officina` in cima al file) |
 | `src/pages/index.astro` | Le quattro cifre della sezione «in cifre» (blocco `numeri` in cima al file) |
@@ -541,6 +564,48 @@ ricalcolarle a ogni cambio di testo. Si cambiano in fondo al file, nelle regole
 
 ---
 
+## La pagina Lavori: filtri, ordine, pagine
+
+Sopra l'elenco c'è un pulsante **Filtri** che apre un pannello. È un
+`<details>`: si apre e si chiude da solo, senza JavaScript.
+
+| Comando | Cosa fa | Funziona senza JavaScript? |
+|---|---|---|
+| **Tag** | Un tag per volta — sono esclusivi per costruzione, perché un lavoro ne porta uno solo | **Sì**, lo fa il CSS con `:has()` |
+| **Committente** | Mostra i lavori di un committente | No: il gruppo compare solo se c'è JavaScript |
+| **Ordina per** | Rilevanza (l'ordine deciso dal proprietario nel campo `ordine`) oppure data della commessa | No, come sopra |
+| **Pagine** | Nove lavori per pagina, cioè tre righe da tre | No: senza JavaScript l'elenco è completo, il che va benissimo |
+
+I due comandi che richiedono un calcolo **non compaiono** quando JavaScript
+non c'è, invece di comparire e non fare niente: un bottone finto è peggio di un
+bottone assente. Sotto l'elenco c'è la fascia dei committenti, e sotto ancora
+il percorso delle tappe.
+
+L'isola che se ne occupa è `src/scripts/filtro-lavori.ts`, 2,2 kB, dichiarata
+in `scripts/check-js.mjs` e servita solo su `/progetti`. Non tocca la rete: i
+lavori sono già tutti nel documento, lei ne mostra una parte.
+
+**Per cambiare quanti lavori stanno in una pagina**, si modifica `PER_PAGINA`
+in cima a `src/pages/progetti.astro`. Il valore arriva all'isola come attributo
+`data-per-pagina`, quindi non va cambiato in due posti.
+
+---
+
+## La pagina Servizi
+
+Ogni servizio è un riquadro quadrato. Cliccandolo si apre, e il servizio si
+distende su tutta la riga con i suoi paragrafi e il suo elenco.
+
+Anche qui sono `<details>`, tutti con lo stesso attributo `name`: è quello che
+li rende un gruppo, e fa sì che **ne resti aperto uno per volta**. Nessun
+JavaScript. Arrivando da un indirizzo con l'ancora — per esempio
+`/servizi#progettazione`, che è dove portano le schede della home — il browser
+apre da solo il riquadro giusto.
+
+I contenuti restano dove erano: `src/lib/servizi.ts`.
+
+---
+
 ## Il percorso nella pagina Lavori
 
 Sotto l'elenco dei lavori c'è un blocco a due colonne: a sinistra un menu che
@@ -568,14 +633,54 @@ con dentro tutte le tavole e tutti i modelli dei lavori pubblicati.
 
 ---
 
-## I clienti in fondo alla home
+## I committenti: un'anagrafica sola
 
-L'elenco sta in `src/lib/clienti.ts`. Finché un'azienda non manda il proprio
-marchio, il sito ne compone il nome nello stile del sito: le targhe hanno tutte
-la stessa altezza, quindi la fila resta ordinata anche mentre i marchi arrivano
-uno alla volta.
+`src/lib/committenti.ts` è l'elenco unico delle aziende per cui abbiamo
+lavorato. Serve a due cose insieme, ed è il motivo per cui è un file solo:
 
-Per aggiungere un marchio:
+- ogni lavoro punta a un committente di questa lista (campo `committente` nel
+  file del progetto). **Scrivendo un id che qui non esiste, la build si ferma
+  e lo dice**: è il modo di non ritrovarsi «Revortex srl» e «Revortex S.r.l.»
+  come se fossero due aziende diverse;
+- la fascia **«Con chi abbiamo lavorato»** — in fondo alla home e sotto
+  l'elenco dei Lavori — è generata da qui, e mostra **solo** i committenti con
+  `visibile: true`.
+
+### Il campo `visibile`
+
+È la differenza fra «abbiamo lavorato per loro» e «possiamo dirlo».
+
+```ts
+// Compare fra le referenze e nei lavori che lo citano
+{ id: 'revortex', nome: 'Revortex srl', visibile: true },
+
+// Compare solo nella scheda del suo lavoro, non fra le referenze
+{ id: 'costruttore-farmaceutico',
+  nome: 'Costruttore di macchine automatiche, settore farmaceutico',
+  visibile: false },
+```
+
+Un lavoro può anche non avere committente: in quel caso la scheda non mostra
+la riga, e basta.
+
+### Aggiungere un committente
+
+```ts
+{
+  id: 'officine-barattieri',          // minuscolo, con i trattini: è la chiave
+  nome: 'Officine Barattieri',        // come va scritto sul sito
+  visibile: true,
+},
+```
+
+L'`id` è quello che si scrive poi nei file dei lavori. Cambiarlo dopo vuol dire
+cambiarlo anche lì — la build lo segnala, quindi non si sbaglia in silenzio.
+
+### Aggiungere un marchio
+
+Finché un'azienda non manda il proprio marchio, il sito ne compone il nome
+nello stile del sito: le targhe hanno tutte la stessa altezza, quindi la fila
+resta ordinata anche mentre i marchi arrivano uno alla volta.
 
 1. mettere il file in `public/img/clienti/` — SVG, oppure PNG largo almeno
    400 px e con lo sfondo trasparente;
@@ -583,9 +688,11 @@ Per aggiungere un marchio:
 
 ```ts
 {
+  id: 'az-vacuum',
   nome: 'AZ Vacuum',
   logo: '/img/clienti/az-vacuum.svg',
   logoAlt: 'Marchio AZ Vacuum',
+  visibile: true,
 },
 ```
 

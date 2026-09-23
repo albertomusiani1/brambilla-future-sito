@@ -22,31 +22,43 @@ import { servizi } from '../lib/servizi';
         principale
       />
 
-      <div class="elenco-servizi">
+      {/* Un quadrato per servizio. Ogni riquadro è un <details>: cliccandolo
+          si apre il servizio disteso, sotto. Nessun JavaScript: apertura e
+          chiusura le fa il browser. L'attributo `name` li rende un gruppo,
+          quindi ne resta aperto uno per volta. E arrivando da un indirizzo
+          con l'ancora — `/servizi#progettazione`, i collegamenti delle
+          schede in home — il browser apre da sé il riquadro giusto. */}
+      <div class="griglia-servizi">
         {
           servizi.map((servizio, indice) => (
-            <article class="voce rivela" id={servizio.id}>
-              <div class="voce__lato">
-                <span class="esagono voce__icona" aria-hidden="true">
+            <details class="quadro rivela" id={servizio.id} name="servizio">
+              <summary class="quadro__fronte">
+                <span class="esagono quadro__icona" aria-hidden="true">
                   <IconaServizio nome={servizio.icona} />
                 </span>
-                <span class="voce__numero" aria-hidden="true">
+                <span class="quadro__numero" aria-hidden="true">
                   {String(indice + 1).padStart(2, '0')}
                 </span>
-              </div>
-              <div class="voce__corpo">
-                <h2>{servizio.titolo}</h2>
+                <span class="quadro__titolo">{servizio.titolo}</span>
+                <span class="quadro__sommario">{servizio.sommario}</span>
+                <span class="quadro__apri" aria-hidden="true">
+                  {t('servizi.apri')}
+                </span>
+              </summary>
+
+              <div class="quadro__corpo">
+                <h2 class="solo-screen-reader">{servizio.titolo}</h2>
                 {servizio.descrizione.map((paragrafo) => (
-                  <p class="voce__paragrafo">{paragrafo}</p>
+                  <p class="quadro__paragrafo">{paragrafo}</p>
                 ))}
-                <p class="etichetta-tecnica voce__sottotitolo">{t('servizi.cosaComprende')}</p>
-                <ul class="voce__punti">
+                <p class="etichetta-tecnica quadro__sottotitolo">{t('servizi.cosaComprende')}</p>
+                <ul class="quadro__punti">
                   {servizio.punti.map((punto) => (
                     <li>{punto}</li>
                   ))}
                 </ul>
               </div>
-            </article>
+            </details>
           ))
         }
       </div>
@@ -65,99 +77,188 @@ import { servizi } from '../lib/servizi';
 </BaseLayout>
 
 <style>
-  .elenco-servizi {
-    display: grid;
-    gap: var(--space-7);
-  }
-
-  .voce {
+  /* La griglia dei quadrati. Sono quadrati davvero (aspect-ratio 1) finché
+     sono chiusi; aprendosi, il riquadro prende tutta la riga e il contenuto
+     si distende sotto. */
+  .griglia-servizi {
     display: grid;
     gap: var(--space-4);
-    padding-top: var(--space-6);
-    border-top: 1px solid var(--colore-bordo);
+  }
+
+  .quadro {
+    border: 1px solid var(--colore-bordo);
+    border-radius: var(--raggio-grande);
+    background-color: var(--colore-superficie);
+    background-image: var(--lucido);
+    overflow: hidden;
     scroll-margin-top: calc(var(--altezza-intestazione) + var(--space-5));
+    transition: border-color var(--transizione);
   }
 
-  .voce__lato {
+  .quadro:hover,
+  .quadro[open] {
+    border-color: var(--colore-bordo-forte);
+  }
+
+  .quadro__fronte {
     display: flex;
-    align-items: center;
-    gap: var(--space-4);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    cursor: pointer;
+    list-style: none;
   }
 
-  .voce__icona {
-    width: 3.25rem;
-    color: var(--colore-accento);
-    background-color: rgb(48 147 201 / 14%);
+  /* Il sommario si allunga e spinge «Apri» in fondo al riquadro: così i
+     quattro quadrati hanno il comando sulla stessa riga anche quando i testi
+     sono di lunghezze diverse. */
+  .quadro__sommario {
+    flex: 1;
   }
 
-  .voce__icona svg {
+  .quadro__fronte::-webkit-details-marker {
+    display: none;
+  }
+
+  .quadro__icona {
+    width: 3rem;
+    color: var(--colore-su-accento);
+  }
+
+  .quadro__icona svg {
     width: 1.5rem;
     height: 1.5rem;
   }
 
-  .voce__numero {
-    color: var(--colore-bordo-forte);
+  .quadro__numero {
+    color: var(--colore-accento);
     font-family: var(--font-mono);
-    font-size: var(--testo-lg);
-    letter-spacing: 0.04em;
+    font-size: var(--testo-xs);
+    letter-spacing: var(--tracciatura-etichetta);
   }
 
-  .voce__corpo {
+  .quadro__titolo {
+    color: var(--colore-titolo);
+    font-family: var(--font-display);
+    font-size: var(--testo-lg);
+    font-weight: 500;
+    line-height: var(--interlinea-stretta);
+    letter-spacing: -0.015em;
+  }
+
+  .quadro__sommario {
+    color: var(--colore-testo-tenue);
+    font-size: var(--testo-sm);
+  }
+
+  /* «Apri» diventa «Chiudi» quando il riquadro è aperto: due parole in
+     un attributo, nessun JavaScript. */
+  .quadro__apri {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: var(--space-2);
+    color: var(--colore-accento);
+    font-family: var(--font-mono);
+    font-size: var(--testo-xs);
+    letter-spacing: var(--tracciatura-etichetta);
+    text-transform: uppercase;
+  }
+
+  .quadro__apri::after {
+    content: '';
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 2px solid currentcolor;
+    border-bottom: 2px solid currentcolor;
+    transform: rotate(45deg) translate(-1px, -1px);
+    transition: transform var(--transizione);
+  }
+
+  .quadro[open] .quadro__apri::after {
+    transform: rotate(-135deg) translate(-1px, -1px);
+  }
+
+  .quadro__corpo {
+    padding: 0 var(--space-5) var(--space-5);
+    border-top: 1px solid var(--colore-bordo);
+    padding-top: var(--space-5);
+  }
+
+  .quadro__paragrafo + .quadro__paragrafo {
+    margin-top: var(--space-4);
+  }
+
+  .quadro__sottotitolo {
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-3);
+  }
+
+  .quadro__punti {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
     max-width: var(--misura);
   }
 
-  .voce__paragrafo {
-    margin-top: var(--space-4);
+  .quadro__punti li {
+    display: grid;
+    grid-template-columns: 0.5rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+    font-size: var(--testo-sm);
     color: var(--colore-testo-tenue);
   }
 
-  .voce__sottotitolo {
-    margin-top: var(--space-6);
-  }
-
-  /* Punti elenco con l'esagono al posto del pallino. */
-  .voce__punti {
-    margin-top: var(--space-4);
-    padding: 0;
-    list-style: none;
-  }
-
-  .voce__punti li {
-    position: relative;
-    padding-left: var(--space-5);
-  }
-
-  .voce__punti li + li {
-    margin-top: var(--space-3);
-  }
-
-  .voce__punti li::before {
+  .quadro__punti li::before {
     content: '';
-    position: absolute;
-    top: 0.55em;
-    left: 0;
     width: 0.5rem;
     height: calc(0.5rem / var(--esagono-proporzione));
     background-color: var(--marchio-blu);
     clip-path: var(--esagono);
+    transform: translateY(0.15em);
   }
 
   .cta__testo {
     margin-top: var(--space-4);
     max-width: var(--misura);
+    color: var(--colore-testo-tenue);
+    font-size: var(--testo-md);
+  }
+
+  @media (min-width: 48em) {
+    .griglia-servizi {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5);
+    }
+
+    /* Chiuso è un quadrato; aperto prende tutta la riga, perché il testo di
+       un servizio in mezza colonna sarebbe una colonna di francobolli. */
+    .quadro:not([open]) .quadro__fronte {
+      aspect-ratio: 1;
+    }
+
+    .quadro[open] {
+      grid-column: 1 / -1;
+    }
   }
 
   @media (min-width: 64em) {
-    .voce {
-      grid-template-columns: 9rem 1fr;
-      gap: var(--space-6);
-      align-items: start;
+    .griglia-servizi {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .voce__lato {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
+    .quadro[open] .quadro__corpo {
+      columns: 2;
+      column-gap: var(--space-7);
+    }
+
+    .quadro[open] .quadro__punti {
+      break-inside: avoid;
     }
   }
 </style>
