@@ -885,6 +885,22 @@ Il lavoro è tutto di traduzione: nessun componente va rifattorizzato.
 
 ## Deploy su Netlify
 
+> **I deploy si pagano, e sono contati.** Netlify conta ogni pubblicazione di
+> produzione a crediti, e il piano gratuito ne comprende una quota mensile.
+> Misurato sul progetto vero: **15 crediti a deploy**, cioè una ventina di
+> pubblicazioni al mese. Traffico e richieste non contano quasi niente (meno di
+> un credito in un mese intero): **quello che consuma è il numero di push**.
+>
+> Per questo `netlify.toml` porta una regola `ignore` che **salta la build
+> quando un commit tocca solo i file `.md`**: documentazione aggiornata, sito
+> identico, nessun deploy. Nella storia del progetto avrebbe risparmiato un
+> quarto delle pubblicazioni.
+>
+> Le altre due abitudini che fanno la differenza, e non costano niente:
+> raggruppare più modifiche in un push solo invece di pubblicare a ogni
+> ritocco, e lavorare su un ramo — le anteprime di ramo servono proprio a
+> guardare una modifica senza pubblicarla.
+
 1. Collegare il repository a Netlify. `netlify.toml` contiene già comando di
    build (`npm run build`), cartella pubblicata (`dist`) e cartella delle
    funzioni (`netlify/functions`).

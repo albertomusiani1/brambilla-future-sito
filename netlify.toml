@@ -7,6 +7,23 @@
   publish = "dist"
   functions = "netlify/functions"
 
+  # Non ricostruire il sito per un commit che tocca solo la documentazione.
+  #
+  # Netlify esegue questo comando prima di decidere se costruire: se esce con
+  # 0 salta la build, se esce con 1 costruisce. `git diff --quiet` esce con 0
+  # quando NON ci sono differenze — quindi qui si legge «se fuori dai file .md
+  # e da reports/ non è cambiato niente, non c'è niente da pubblicare».
+  #
+  # Perché conta: su questo piano ogni deploy di produzione costa crediti, e
+  # sono contati. Nella storia del progetto tre commit su dodici toccavano
+  # solo README, GUIDA o PLAN: tre ricostruzioni di un sito identico, un
+  # quarto del budget mensile speso per niente.
+  #
+  # Al primo deploy la variabile del commit precedente è vuota, il comando
+  # fallisce e il sito viene costruito: l'errore, se c'è, sbaglia nel verso
+  # giusto.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':(exclude)*.md' ':(exclude)reports/'"
+
 [build.environment]
   NODE_VERSION = "22"
 
