@@ -31,6 +31,11 @@ const dist = path.join(radice, 'dist');
  */
 const ISOLE = [
   {
+    nome: 'AdminPage',
+    perche: 'prototipo locale; inattivo nella build ordinaria, solo sulla pagina admin',
+    pagine: /^\/admin(?:\/(?:progetti|dashboard))?$/,
+  },
+  {
     nome: 'EroeVideo',
     perche: 'avvia e mette in pausa il video del hero, misura l\'intestazione',
     pagine: /^\/$/,
