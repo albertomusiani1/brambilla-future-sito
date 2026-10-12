@@ -239,10 +239,9 @@ esempio, togliendo `descrizioneBreve`:
   Location: src/content/progetti/nuova-commessa.md
 ```
 
-Lo stesso succede scrivendo un `committente` che non esiste nell'anagrafica, o
-mettendo un'immagine senza il suo `immagineAlt`. È voluto: meglio accorgersene
-subito che pubblicare una scheda a metà — o senza il testo alternativo, che è
-un difetto di accessibilità che nessuno nota finché non è troppo tardi.
+Lo stesso succede scrivendo un `committente` che non esiste nell'anagrafica.
+Il campo `immagineAlt` è facoltativo e non ha una lunghezza minima: quando manca,
+il sito usa il titolo del progetto come testo alternativo dell'immagine.
 
 ---
 
