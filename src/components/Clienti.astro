@@ -18,11 +18,10 @@ export interface Props {
 const { indice = '01' } = Astro.props;
 
 /**
- * Solo i committenti marcati `visibile: true` nell'anagrafica. Gli altri
- * restano nella scheda del loro lavoro e non compaiono qui: è la differenza
- * fra «abbiamo lavorato per loro» e «possiamo dirlo».
+ * Solo i committenti visibili nell'anagrafica; in home serve anche `inHome`.
+ * I committenti nascosti non vengono mostrati nelle schede o nei filtri.
  */
-const clienti = committentiVisibili();
+const clienti = committentiVisibili(Astro.url.pathname === '/');
 
 /**
  * Sigla di ripiego finché non arriva il marchio.

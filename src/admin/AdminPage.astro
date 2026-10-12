@@ -1,0 +1,96 @@
+---
+import { getCollection } from 'astro:content';
+import { committenti } from '../lib/committenti';
+import { CATEGORIE_PROGETTO } from '../lib/schema-progetto';
+import './admin.css';
+const { pagina = 'dashboard' } = Astro.props;
+const enabled = import.meta.env.DEV;
+const progetti = enabled ? (await getCollection('progetti')).map(p => ({ id: p.id, data: p.data, body: p.body ?? '', stato: 'pubblicato' })) : [];
+const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] });
+---
+<!doctype html>
+<html lang="it">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex,nofollow" /><title>PROJECTUNE · {pagina === 'dashboard' ? 'Dashboard' : 'Progetti e committenti'}</title></head>
+  <body class="admin">
+    {enabled && pagina === 'login' ? <main class="login-page">
+      <img class="login-brand" src="/img/logo-projectune.svg" alt="PROJECTUNE" />
+      <div class="panel"><p class="eyebrow">Area proprietario</p><h1>Accedi.</h1>
+        <form id="login-form"><label>Username<input name="username" autocomplete="username" required /></label><label>Password<input name="password" type="password" autocomplete="current-password" required /></label><button type="submit">Accedi</button><p id="login-error" role="alert"></p></form>
+      </div><a href="/">← Torna al sito</a>
+    </main> : enabled ? <>
+      <a class="skip" href="#workspace">Vai al contenuto</a>
+      <aside class="sidebar">
+        <a href="/admin/dashboard" class="brand"><img src="/img/logo-projectune.svg" alt="PROJECTUNE" /></a>
+        <p class="eyebrow">Area proprietario / prototipo</p>
+        <nav aria-label="Amministrazione">
+          <a href="/admin/dashboard" aria-current={pagina === 'dashboard' ? 'page' : undefined}>01 Dashboard</a>
+          <a href="/admin/progetti" aria-current={pagina === 'progetti' ? 'page' : undefined}>02 Progetti e committenti</a>
+        </nav>
+        <a href="/">↗ Apri il sito pubblico</a>
+        <button id="apri-credenziali" class="secondary" type="button">Credenziali di accesso</button><button id="logout" class="secondary" type="button">Esci</button>
+        <button id="reset-sito" class="secondary" type="button">Ripristina sito dopo le prove</button>
+      </aside>
+      <main id="workspace">
+        <header><p class="eyebrow">PROJECTUNE / Controllo contenuti</p><h1>{pagina === 'dashboard' ? 'La tua officina digitale.' : 'Progetti e committenti.'}</h1><p>{pagina === 'dashboard' ? 'Uno sguardo sul sito, poi al lavoro sui contenuti.' : 'Tutto in ordine. Apri una scheda per modificarla.'}</p></header>
+        <p id="feedback" role="status" aria-live="polite"></p>
+        {pagina === 'dashboard' ? <>
+          <section id="dashboard"><div class="section-head"><h2>Dashboard</h2><label>Periodo <select id="periodo"><option>Ultimi 7 giorni</option><option selected>Ultimi 30 giorni</option><option>Ultimi 90 giorni</option></select></label></div>
+            <div class="stats"><article><p>Visite</p><strong>—</strong></article><article><p>Pagine più viste</p><strong>—</strong></article><article><p>Provenienza</p><strong>—</strong></article></div>
+            <div class="panel"><h3>Analytics non configurato</h3><p id="analytics-status">Nessun dato disponibile per il periodo selezionato. Non vengono raccolti o inviati dati.</p></div>
+          </section>
+          <section class="panel"><h2>Gestisci i contenuti</h2><p>Aggiungi progetti, aggiorna i committenti e scegli cosa mostrare nella home.</p><a class="action-link" href="/admin/progetti">Apri progetti e committenti →</a></section>
+        </> : <>
+          <section id="progetti"><div class="section-head"><h2>Progetti</h2><div class="actions"><button id="ordine-progetti" type="button" class="secondary" aria-expanded="false">Modifica ordine</button><button id="nuovo-progetto" type="button">+ Aggiungi progetto</button></div></div><p class="small">Ordine generale del sito. “In home” seleziona i progetti in evidenza: la home ne mostra al massimo tre, nello stesso ordine.</p><div id="lista-progetti" class="list"></div>
+            <dialog id="ordine" aria-labelledby="ordine-title"><div class="section-head"><h2 id="ordine-title">Modifica ordine progetti</h2><button id="fine-ordine-progetti" data-close="ordine" class="close-dialog" aria-label="Chiudi ordinamento progetti" type="button">×</button></div><p>Trascina le righe, usa Su/Giù o inserisci una posizione. Le modifiche vengono salvate subito.</p><p id="home-order-status" class="small" role="status"></p><div id="lista-ordine" class="list"></div></dialog>
+            <details class="panel"><summary>Anteprima della selezione home</summary><ol id="home-preview"></ol></details>
+          </section>
+          <section id="committenti"><div class="section-head"><h2>Committenti</h2><div class="actions"><button id="ordine-committenti" type="button" class="secondary" aria-expanded="false">Modifica ordine</button><button type="button" id="nuovo-committente">+ Aggiungi committente</button></div></div><p class="small">Gestisci la visibilità nelle schede e nel popup di ordinamento. La home può mostrare al massimo 7 committenti visibili.</p><div id="lista-committenti" class="list"></div>
+            <dialog id="riordino-committenti" aria-labelledby="ordine-clienti-title"><div class="section-head"><h2 id="ordine-clienti-title">Modifica ordine committenti</h2><button id="fine-ordine-committenti" data-close="riordino-committenti" class="close-dialog" aria-label="Chiudi ordinamento committenti" type="button">×</button></div><p>Trascina le righe oppure usa i comandi da tastiera. Le modifiche vengono salvate subito.</p><p id="home-clients-order-status" class="small" role="status"></p><div id="lista-ordine-committenti" class="list"></div></dialog>
+          </section>
+        </>}
+      </main>
+      {pagina === 'progetti' && <>
+        <dialog id="editor-progetto" aria-labelledby="editor-title">
+          <div class="section-head"><div class="editor-heading"><h2 id="editor-title">Nuovo progetto</h2><span id="editor-draft" class="badge" hidden>Bozza</span></div><button type="button" id="chiudi-progetto" data-close="editor-progetto" class="close-dialog" aria-label="Chiudi progetto">×</button></div>
+          <form id="form-progetto">
+            <div class="fields">
+              <input name="id" type="hidden" />
+              <label>Titolo<input name="titolo" required minlength="3" maxlength="120" /></label>
+              <label class="wide">Abstract<textarea name="descrizioneBreve" required minlength="20" maxlength="160"></textarea></label>
+              <div><label>Committente<select name="committente" id="select-committente"></select></label><button type="button" id="committente-dal-progetto" class="secondary">+ Nuovo committente</button></div>
+              <label>Categoria<select name="categoria"><option value="">Non specificata</option>{CATEGORIE_PROGETTO.map(c => <option>{c}</option>)}</select></label>
+              <label>Data della commessa<input type="date" name="data" /></label>
+              <label>Ordine generale<input type="number" name="ordine" min="1" step="1" /></label>
+              <div><label>Immagine di copertina<input type="file" id="upload-immagine" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" /></label><input name="immagine" type="hidden" /><div id="thumb-immagine" class="asset-preview"></div><p id="file-immagine" class="small">Nessuna immagine</p><button type="button" id="rimuovi-immagine" class="secondary">Rimuovi immagine</button></div>
+              <label>Testo alternativo immagine (facoltativo)<input name="immagineAlt" /></label>
+              <label class="wide">Punti chiave (uno per riga, massimo 6)<textarea name="puntiChiave"></textarea></label>
+              <label class="wide">Contenuto della pagina (Markdown)<textarea name="body" rows="10"></textarea></label>
+              <label class="check"><input name="inEvidenza" type="checkbox" /> In evidenza nella home</label>
+              <p id="home-project-status" class="small"></p>
+            </div>
+            <h3>Disegni 2D e modelli 3D</h3><p class="small">Massimo 8 allegati, 20 MB per file. Carica un disegno SVG/PNG oppure un modello STL con la sua immagine di anteprima. Il sito gestisce nomi e percorsi.</p>
+            <div id="disegni"></div><button type="button" id="aggiungi-disegno" class="secondary">+ Aggiungi allegato</button>
+            <div class="actions"><button type="button" id="anteprima" class="secondary">Anteprima</button><button type="submit" name="azione" value="bozza">Salva bozza</button><button type="submit" name="azione" value="pubblicato">Pubblica</button></div>
+            <div class="actions"><button type="button" id="ripristina-pubblicato" class="secondary" hidden>Ripristina versione pubblicata</button></div><p id="draft-restore-help" class="small" hidden></p>
+            <p id="errori-progetto" role="alert"></p>
+          </form>
+        </dialog>
+        <dialog id="editor-committente" aria-labelledby="committente-title">
+          <div class="section-head"><h2 id="committente-title">Nuovo committente</h2><button type="button" id="chiudi-committente" data-close="editor-committente" class="close-dialog" aria-label="Chiudi committente">×</button></div>
+          <form id="form-committente"><div class="fields">
+            <input name="id" type="hidden" /><label>Nome<input name="nome" required /></label>
+            <div><label>Logo<input type="file" id="upload-logo" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" /></label><input name="logo" type="hidden" /><div id="thumb-logo" class="asset-preview"></div><p id="file-logo" class="small">Nessun logo</p><button type="button" id="rimuovi-logo" class="secondary">Rimuovi logo</button></div>
+            <label>Testo alternativo logo (facoltativo)<input name="logoAlt" /></label><label>Sito aziendale<input name="sito" type="url" /></label><label class="check"><input name="visibile" type="checkbox" /> Visibile nel sito</label><label class="check"><input name="inHome" type="checkbox" /> Visibile nella home</label><p id="home-client-status" class="small wide"></p>
+          </div><div class="actions"><button type="submit">Salva committente</button></div><p id="errori-committente" role="alert"></p></form>
+        </dialog>
+        <dialog id="preview" aria-labelledby="preview-title"><div class="section-head"><h2 id="preview-title">Anteprima</h2><button id="chiudi-preview" data-close="preview" class="close-dialog" aria-label="Chiudi anteprima" type="button">×</button></div><article id="preview-content"></article></dialog>
+        <dialog id="asset-viewer" aria-labelledby="asset-title"><div class="section-head"><h2 id="asset-title">Immagine</h2><button data-close="asset-viewer" class="close-dialog" aria-label="Chiudi immagine" type="button">×</button></div><img id="asset-image" alt="" /><div class="actions"><button id="asset-replace" type="button">Sostituisci</button><button id="asset-remove" type="button" class="secondary">Rimuovi</button></div></dialog>
+        <div id="admin-seed" data-seed={seed} hidden></div>
+      </>}
+      <dialog id="credenziali" aria-labelledby="credenziali-title"><div class="section-head"><h2 id="credenziali-title">Credenziali di accesso</h2><button data-close="credenziali" class="close-dialog" aria-label="Chiudi credenziali" type="button">×</button></div><form id="credentials-form"><label>Password attuale<input name="currentPassword" type="password" autocomplete="current-password" required /></label><label>Nuovo username<input name="username" autocomplete="username" required minlength="3" maxlength="50" pattern="[a-zA-Z0-9._-]+" /></label><label>Nuova password<input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="256" /></label><label>Ripeti nuova password<input name="repeat" type="password" autocomplete="new-password" required minlength="8" /></label><button type="submit">Aggiorna credenziali</button><p id="credentials-error" role="alert"></p></form></dialog>
+      <dialog id="conferma" aria-labelledby="conferma-title"><div class="section-head"><h2 id="conferma-title">Conferma</h2><button data-close="conferma" class="close-dialog" aria-label="Annulla" type="button">×</button></div><p id="conferma-message"></p><div id="conferma-actions" class="actions"></div></dialog>
+      <noscript>Il prototipo richiede JavaScript per gestire i contenuti locali.</noscript>
+    </> : <main><h1>Prototipo amministrativo disattivato</h1><p>Disponibile solo in sviluppo locale. Questa pagina non offre accesso amministrativo.</p><a href="/">Torna al sito</a></main>}
+    <script>import './admin';</script>
+  </body>
+</html>

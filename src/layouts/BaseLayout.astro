@@ -77,5 +77,10 @@ const schemi = briciole?.length ? [...jsonLd, schemaBriciole(briciole, site)] : 
       <slot />
     </main>
     <Footer />
+    {import.meta.env.DEV && <script is:inline type="module">
+      import { createHotContext } from '/@vite/client';
+      const updates = createHotContext('/__projectune_public_refresh');
+      updates.on('projectune:site-updated', () => window.location.reload());
+    </script>}
   </body>
 </html>
