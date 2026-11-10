@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import adminUpload from './scripts/admin-upload.mjs';
 
 /**
  * Indirizzo pubblico del sito. Da qui escono gli URL canonici, le anteprime
@@ -51,6 +52,9 @@ export default defineConfig({
     },
   },
   vite: {
+    server: { fs: { deny: ['**/.admin-local/**', '**/.env', '**/.env.*', '**/*.{crt,pem}', '**/.git/**'] } },
+    // Local development only: server-side sessions and authenticated uploads.
+    plugins: [adminUpload()],
     build: {
       // Nessuna risorsa inline: lo script del modulo contatti viene emesso
       // come file esterno, così la CSP può restare senza 'unsafe-inline'.
@@ -61,7 +65,7 @@ export default defineConfig({
     sitemap({
       // Le pagine con noindex non devono finire in sitemap.
       filter: (page) =>
-        !['/404', '/contatti/grazie', '/contatti/errore'].some((escluso) =>
+        !new URL(page).pathname.startsWith('/admin') && !['/404', '/contatti/grazie', '/contatti/errore'].some((escluso) =>
           page.replace(/\/$/, '').endsWith(escluso)
         ),
     }),

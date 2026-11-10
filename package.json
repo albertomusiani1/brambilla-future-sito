@@ -20,6 +20,11 @@
     "check:pages": "node scripts/check-pages.mjs",
     "check:i18n": "node scripts/check-i18n.mjs",
     "check:js": "node scripts/check-js.mjs",
+    "check:admin": "node scripts/check-admin.mjs",
+    "check:uploads": "node --test tests/admin-upload.test.mjs",
+    "check:auth": "node --test tests/admin-auth.test.mjs",
+    "check:committenti": "node --test tests/committenti.test.mjs",
+    "check:site": "node --test tests/admin-site.test.mjs",
     "check:responsive": "node scripts/check-responsive.mjs",
     "check:html": "html-validate \"dist/**/*.html\"",
     "check:links": "linkinator dist --recurse --skip \"^https://www\\.projectune\\.it\"",
@@ -34,9 +39,11 @@
     "@astrojs/check": "0.9.10",
     "@astrojs/sitemap": "3.7.3",
     "astro": "7.2.9",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "yaml": "2.9.0"
   },
   "devDependencies": {
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "devalue": "^5.9.2"
   }
 }

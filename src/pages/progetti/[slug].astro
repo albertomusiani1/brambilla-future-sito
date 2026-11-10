@@ -9,7 +9,7 @@ import { t } from '../../i18n';
 import { azienda } from '../../lib/azienda';
 import { trovaCommittente } from '../../lib/committenti';
 import { schemaProgetto } from '../../lib/schema';
-import { componiDescrizione, validaTitolo } from '../../lib/seo';
+import { componiDescrizione, componiTitolo } from '../../lib/seo';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const progetti = await getCollection('progetti');
@@ -46,7 +46,7 @@ const dataLeggibile = data
   ? new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }).format(data)
   : undefined;
 
-const titoloSeo = validaTitolo(titolo, percorso);
+const titoloSeo = componiTitolo(titolo, percorso);
 /**
  * La coda della descrizione si compone con quello che c'è: di un lavoro può
  * mancare tutto tranne titolo e abstract, e una frase con dei buchi dentro è
@@ -126,7 +126,7 @@ const simili = [
           <img
             class="progetto__immagine"
             src={immagine}
-            alt={immagineAlt ?? ''}
+            alt={immagineAlt || titolo}
             width="800"
             height="500"
             decoding="async"

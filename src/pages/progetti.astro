@@ -43,7 +43,7 @@ const idCategoria = (categoria: string) =>
 
 /** Solo i committenti che hanno almeno un lavoro pubblicato. */
 const committentiUsati = committenti.filter((c) =>
-  progetti.some((p) => p.data.committente === c.id)
+  c.visibile && progetti.some((p) => p.data.committente === c.id)
 );
 
 /** Quanti lavori per pagina: tre righe da tre schede. */
@@ -191,7 +191,7 @@ const PER_PAGINA = 9;
                 <li
                   class="rivela"
                   data-categoria={progetto.data.categoria}
-                  data-committente={progetto.data.committente}
+                  data-committente={trovaCommittente(progetto.data.committente)?.id}
                   data-rilevanza={String(progetto.data.ordine ?? 9999)}
                   data-data={progetto.data.data?.toISOString().slice(0, 10) ?? ''}
                 >

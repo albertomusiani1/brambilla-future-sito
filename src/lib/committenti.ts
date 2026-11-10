@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CONTENUTO — L'anagrafica dei committenti.
  *
  * È l'elenco unico delle aziende per cui abbiamo lavorato. Serve a due cose
@@ -10,9 +10,8 @@
  *   2. la fascia «Con chi abbiamo lavorato» è generata da questa lista, e
  *      mostra **solo** i committenti con `visibile: true`.
  *
- * Il senso di `visibile: false`: un committente che non vuole comparire fra
- * le referenze, ma il cui lavoro si può comunque raccontare. Il nome appare
- * nella scheda del lavoro, non nella lista pubblica.
+ * `visibile: false` nasconde il committente in tutto il sito pubblico.
+ * `inHome` seleziona al massimo sette committenti visibili nella home.
  *
  * Per aggiungere un marchio:
  *   1. mettere il file in `public/img/clienti/` (SVG, o PNG largo almeno
@@ -34,29 +33,30 @@ export interface Committente {
   /** Sito dell'azienda, se si vuole collegare il marchio. */
   sito?: string;
   /**
-   * false per tenerlo fuori dalla fascia delle referenze in home e nella
-   * pagina Lavori. Resta visibile nella scheda del lavoro.
+   * false per nasconderlo da referenze, filtri e schede del sito pubblico.
    */
   visibile: boolean;
+  /** Presenza nella home, consentita solo quando visibile è true. */
+  inHome: boolean;
 }
 
 export const committenti: Committente[] = [
-  { id: 'az-vacuum', nome: 'AZ Vacuum', visibile: true },
-  { id: 'revortex', nome: 'Revortex srl', visibile: true },
-  { id: 'people-design', nome: 'People Design', visibile: true },
-  { id: 'sl-servizio-lame', nome: 'SL Servizio Lame di Antonio Marchesini', visibile: true },
-  { id: 'roscomec', nome: 'Roscomec di Rossi Fabio', visibile: true },
-  { id: 'maunoa', nome: 'Maunoa srl', visibile: true },
-  { id: 'exon-compositi', nome: 'Exon Compositi srl', visibile: true },
+  { id: 'az-vacuum', nome: 'AZ Vacuum', visibile: true, inHome: true },
+  { id: 'revortex', nome: 'Revortex srl', visibile: true, inHome: true },
+  { id: 'people-design', nome: 'People Design', visibile: true, inHome: true },
+  { id: 'sl-servizio-lame', nome: 'SL Servizio Lame di Antonio Marchesini', visibile: true, inHome: true },
+  { id: 'roscomec', nome: 'Roscomec di Rossi Fabio', visibile: true, inHome: true },
+  { id: 'maunoa', nome: 'Maunoa srl', visibile: true, inHome: true },
+  { id: 'exon-compositi', nome: 'Exon Compositi srl', visibile: true, inHome: true },
   /**
    * Committenti che non compaiono fra le referenze. Servono ai lavori che si
    * possono raccontare ma la cui committenza non è pubblicabile.
    */
-  { id: 'costruttore-farmaceutico', nome: 'Costruttore di macchine automatiche, settore farmaceutico', visibile: false },
-  { id: 'costruttore-packaging', nome: 'Costruttore di macchine per il packaging', visibile: false },
-  { id: 'officina-meccanica', nome: 'Officina meccanica conto terzi', visibile: false },
-  { id: 'fonderia', nome: 'Fonderia di alluminio', visibile: false },
-  { id: 'oleodinamica', nome: 'Costruttore di impianti oleodinamici', visibile: false },
+  { id: 'costruttore-farmaceutico', nome: 'Costruttore di macchine automatiche, settore farmaceutico', visibile: false, inHome: false },
+  { id: 'costruttore-packaging', nome: 'Costruttore di macchine per il packaging', visibile: false, inHome: false },
+  { id: 'officina-meccanica', nome: 'Officina meccanica conto terzi', visibile: false, inHome: false },
+  { id: 'fonderia', nome: 'Fonderia di alluminio', visibile: false, inHome: false },
+  { id: 'oleodinamica', nome: 'Costruttore di impianti oleodinamici', visibile: false, inHome: false },
 ];
 
 /** Gli id ammessi: li usa lo schema della collection per validare i file. */
@@ -64,7 +64,10 @@ export const ID_COMMITTENTI = committenti.map((c) => c.id) as [string, ...string
 
 /** Il committente con quell'id, o undefined se non c'è. */
 export const trovaCommittente = (id: string | undefined): Committente | undefined =>
-  id === undefined ? undefined : committenti.find((c) => c.id === id);
+  id === undefined ? undefined : committenti.find((c) => c.id === id && c.visibile);
 
 /** Solo quelli che vogliono comparire fra le referenze. */
-export const committentiVisibili = (): Committente[] => committenti.filter((c) => c.visibile);
+export const committentiVisibili = (home = false): Committente[] => {
+  const visibili = committenti.filter((c) => c.visibile && (!home || c.inHome));
+  return home ? visibili.slice(0, 7) : visibili;
+};

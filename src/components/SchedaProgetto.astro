@@ -41,7 +41,7 @@ const conDisegni = (disegni ?? []).length > 0;
       immagine ? (
         <img
           src={immagine}
-          alt={immagineAlt ?? ''}
+          alt={immagineAlt || titolo}
           width="800"
           height="500"
           loading={prioritaria ? 'eager' : 'lazy'}

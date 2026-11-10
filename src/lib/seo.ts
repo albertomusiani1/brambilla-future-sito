@@ -18,6 +18,11 @@ export function validaTitolo(titolo: string, dove: string): string {
   return titolo;
 }
 
+/** Deriva il titolo SEO senza limitare il titolo editoriale (schema: 120). */
+export function componiTitolo(titolo: string, dove: string): string {
+  return validaTitolo(titolo.length > LUNGHEZZA_MAX_TITOLO ? `${troncaAParola(titolo, LUNGHEZZA_MAX_TITOLO - 1)}…` : titolo, dove);
+}
+
 export function validaDescrizione(descrizione: string, dove: string): string {
   if (
     descrizione.length < LUNGHEZZA_MIN_DESCRIZIONE ||
@@ -47,6 +52,9 @@ export function componiDescrizione(base: string, complemento: string, dove: stri
 
   if (descrizione.length < LUNGHEZZA_MIN_DESCRIZIONE) {
     descrizione = `${descrizione} ${complemento.trim()}`.trim();
+  }
+  if (descrizione.length < LUNGHEZZA_MIN_DESCRIZIONE) {
+    descrizione = `${descrizione} Scopri il progetto e contatta PROJECTUNE per informazioni sui servizi e sulle lavorazioni descritte in questa pagina.`;
   }
 
   if (descrizione.length > LUNGHEZZA_MAX_DESCRIZIONE) {
