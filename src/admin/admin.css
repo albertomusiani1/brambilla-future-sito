@@ -5,3 +5,17 @@
 .admin .login-page{margin:0 auto;max-width:490px;padding:55px 24px}.admin .login-brand{width:160px;display:block;margin:auto}.admin #login-form,.admin #credentials-form{display:grid;gap:18px}.admin .login-page>a{display:block;margin-top:22px}.admin dialog>.section-head{padding-right:42px;min-height:35px}.admin .close-dialog{position:absolute;top:15px;right:15px;background:transparent;color:#cbeaff;border:0;font-size:28px;width:40px;height:40px;padding:0;line-height:1}.admin .close-dialog:hover{background:#39474e}.admin .thumbnail{display:block;background:#e9eef1;border:1px solid #526269;padding:8px;margin-top:8px;max-width:240px;width:100%}.admin .thumbnail img{display:block;max-width:100%;max-height:150px;object-fit:contain;margin:auto}.admin #asset-image{display:block;max-width:100%;max-height:60vh;margin:20px auto;object-fit:contain;background:#e9eef1}.admin #conferma{max-width:580px}.admin #ordine,.admin #riordino-committenti{width:min(1050px,94vw)}.admin dialog .row .title{min-width:140px}.admin dialog .fields{margin-top:14px}
 .admin dialog>.section-head{position:sticky;top:-26px;z-index:5;margin:-26px -26px 0;padding:20px 68px 20px 26px;background:#20292d;border-bottom:1px solid #39474e}.admin input[type=checkbox]:disabled{opacity:.45;cursor:not-allowed}
 .admin .editor-heading{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+/* Avviso dell'anteprima pubblica: deve essere la prima cosa che si legge,
+   perché online «Pubblica» non pubblica niente e il login non protegge. */
+.avviso-anteprima {
+  margin: 0 0 1rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid #b9821f;
+  border-left-width: 4px;
+  border-radius: 4px;
+  background: #2a2111;
+  color: #f3d79a;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}

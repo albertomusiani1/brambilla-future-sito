@@ -4,7 +4,14 @@ import { committenti } from '../lib/committenti';
 import { CATEGORIE_PROGETTO } from '../lib/schema-progetto';
 import './admin.css';
 const { pagina = 'dashboard' } = Astro.props;
-const enabled = import.meta.env.DEV;
+/**
+ * L'interfaccia si costruisce anche nella build pubblicata, così la si può
+ * guardare e far evolvere online invece che solo su localhost. Online non c'è
+ * il server: al suo posto entra `anteprima.ts`, che risponde dal browser.
+ * Per una build definitiva senza area riservata: PUBLIC_ADMIN=off.
+ */
+const enabled = import.meta.env.DEV || import.meta.env['PUBLIC_ADMIN'] !== 'off';
+const anteprima = !import.meta.env.DEV;
 const progetti = enabled ? (await getCollection('progetti')).map(p => ({ id: p.id, data: p.data, body: p.body ?? '', stato: 'pubblicato' })) : [];
 const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] });
 ---
@@ -14,8 +21,9 @@ const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] 
   <body class="admin">
     {enabled && pagina === 'login' ? <main class="login-page">
       <img class="login-brand" src="/img/logo-projectune.svg" alt="PROJECTUNE" />
+      {anteprima && <p class="avviso-anteprima">Anteprima pubblica · l'accesso non protegge nulla e le modifiche restano nel tuo browser</p>}
       <div class="panel"><p class="eyebrow">Area proprietario</p><h1>Accedi.</h1>
-        <form id="login-form"><label>Username<input name="username" autocomplete="username" required /></label><label>Password<input name="password" type="password" autocomplete="current-password" required /></label><button type="submit">Accedi</button><p id="login-error" role="alert"></p></form>
+        <form id="login-form"><label>Username<input name="username" type="text" autocomplete="username" required /></label><label>Password<input name="password" type="password" autocomplete="current-password" required /></label><button type="submit">Accedi</button><p id="login-error" role="alert"></p></form>
       </div><a href="/">← Torna al sito</a>
     </main> : enabled ? <>
       <a class="skip" href="#workspace">Vai al contenuto</a>
@@ -32,6 +40,7 @@ const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] 
       </aside>
       <main id="workspace">
         <header><p class="eyebrow">PROJECTUNE / Controllo contenuti</p><h1>{pagina === 'dashboard' ? 'La tua officina digitale.' : 'Progetti e committenti.'}</h1><p>{pagina === 'dashboard' ? 'Uno sguardo sul sito, poi al lavoro sui contenuti.' : 'Tutto in ordine. Apri una scheda per modificarla.'}</p></header>
+        {anteprima && <p class="avviso-anteprima">Anteprima pubblica · quello che salvi resta nel tuo browser e non tocca il sito. Per modificare i contenuti veri serve l'admin in locale.</p>}
         <p id="feedback" role="status" aria-live="polite"></p>
         {pagina === 'dashboard' ? <>
           <section id="dashboard"><div class="section-head"><h2>Dashboard</h2><label>Periodo <select id="periodo"><option>Ultimi 7 giorni</option><option selected>Ultimi 30 giorni</option><option>Ultimi 90 giorni</option></select></label></div>
@@ -55,14 +64,14 @@ const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] 
           <form id="form-progetto">
             <div class="fields">
               <input name="id" type="hidden" />
-              <label>Titolo<input name="titolo" required minlength="3" maxlength="120" /></label>
+              <label>Titolo<input name="titolo" type="text" required minlength="3" maxlength="120" /></label>
               <label class="wide">Abstract<textarea name="descrizioneBreve" required minlength="20" maxlength="160"></textarea></label>
               <div><label>Committente<select name="committente" id="select-committente"></select></label><button type="button" id="committente-dal-progetto" class="secondary">+ Nuovo committente</button></div>
               <label>Categoria<select name="categoria"><option value="">Non specificata</option>{CATEGORIE_PROGETTO.map(c => <option>{c}</option>)}</select></label>
               <label>Data della commessa<input type="date" name="data" /></label>
               <label>Ordine generale<input type="number" name="ordine" min="1" step="1" /></label>
               <div><label>Immagine di copertina<input type="file" id="upload-immagine" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" /></label><input name="immagine" type="hidden" /><div id="thumb-immagine" class="asset-preview"></div><p id="file-immagine" class="small">Nessuna immagine</p><button type="button" id="rimuovi-immagine" class="secondary">Rimuovi immagine</button></div>
-              <label>Testo alternativo immagine (facoltativo)<input name="immagineAlt" /></label>
+              <label>Testo alternativo immagine (facoltativo)<input name="immagineAlt" type="text" /></label>
               <label class="wide">Punti chiave (uno per riga, massimo 6)<textarea name="puntiChiave"></textarea></label>
               <label class="wide">Contenuto della pagina (Markdown)<textarea name="body" rows="10"></textarea></label>
               <label class="check"><input name="inEvidenza" type="checkbox" /> In evidenza nella home</label>
@@ -78,19 +87,24 @@ const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] 
         <dialog id="editor-committente" aria-labelledby="committente-title">
           <div class="section-head"><h2 id="committente-title">Nuovo committente</h2><button type="button" id="chiudi-committente" data-close="editor-committente" class="close-dialog" aria-label="Chiudi committente">×</button></div>
           <form id="form-committente"><div class="fields">
-            <input name="id" type="hidden" /><label>Nome<input name="nome" required /></label>
+            <input name="id" type="hidden" /><label>Nome<input name="nome" type="text" required /></label>
             <div><label>Logo<input type="file" id="upload-logo" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" /></label><input name="logo" type="hidden" /><div id="thumb-logo" class="asset-preview"></div><p id="file-logo" class="small">Nessun logo</p><button type="button" id="rimuovi-logo" class="secondary">Rimuovi logo</button></div>
-            <label>Testo alternativo logo (facoltativo)<input name="logoAlt" /></label><label>Sito aziendale<input name="sito" type="url" /></label><label class="check"><input name="visibile" type="checkbox" /> Visibile nel sito</label><label class="check"><input name="inHome" type="checkbox" /> Visibile nella home</label><p id="home-client-status" class="small wide"></p>
+            <label>Testo alternativo logo (facoltativo)<input name="logoAlt" type="text" /></label><label>Sito aziendale<input name="sito" type="url" /></label><label class="check"><input name="visibile" type="checkbox" /> Visibile nel sito</label><label class="check"><input name="inHome" type="checkbox" /> Visibile nella home</label><p id="home-client-status" class="small wide"></p>
           </div><div class="actions"><button type="submit">Salva committente</button></div><p id="errori-committente" role="alert"></p></form>
         </dialog>
         <dialog id="preview" aria-labelledby="preview-title"><div class="section-head"><h2 id="preview-title">Anteprima</h2><button id="chiudi-preview" data-close="preview" class="close-dialog" aria-label="Chiudi anteprima" type="button">×</button></div><article id="preview-content"></article></dialog>
-        <dialog id="asset-viewer" aria-labelledby="asset-title"><div class="section-head"><h2 id="asset-title">Immagine</h2><button data-close="asset-viewer" class="close-dialog" aria-label="Chiudi immagine" type="button">×</button></div><img id="asset-image" alt="" /><div class="actions"><button id="asset-replace" type="button">Sostituisci</button><button id="asset-remove" type="button" class="secondary">Rimuovi</button></div></dialog>
+        <dialog id="asset-viewer" aria-labelledby="asset-title"><div class="section-head"><h2 id="asset-title">Immagine</h2><button data-close="asset-viewer" class="close-dialog" aria-label="Chiudi immagine" type="button">×</button></div><img id="asset-image" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" /><div class="actions"><button id="asset-replace" type="button">Sostituisci</button><button id="asset-remove" type="button" class="secondary">Rimuovi</button></div></dialog>
         <div id="admin-seed" data-seed={seed} hidden></div>
       </>}
-      <dialog id="credenziali" aria-labelledby="credenziali-title"><div class="section-head"><h2 id="credenziali-title">Credenziali di accesso</h2><button data-close="credenziali" class="close-dialog" aria-label="Chiudi credenziali" type="button">×</button></div><form id="credentials-form"><label>Password attuale<input name="currentPassword" type="password" autocomplete="current-password" required /></label><label>Nuovo username<input name="username" autocomplete="username" required minlength="3" maxlength="50" pattern="[a-zA-Z0-9._-]+" /></label><label>Nuova password<input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="256" /></label><label>Ripeti nuova password<input name="repeat" type="password" autocomplete="new-password" required minlength="8" /></label><button type="submit">Aggiorna credenziali</button><p id="credentials-error" role="alert"></p></form></dialog>
+      <dialog id="credenziali" aria-labelledby="credenziali-title"><div class="section-head"><h2 id="credenziali-title">Credenziali di accesso</h2><button data-close="credenziali" class="close-dialog" aria-label="Chiudi credenziali" type="button">×</button></div><form id="credentials-form"><label>Password attuale<input name="currentPassword" type="password" autocomplete="current-password" required /></label><label>Nuovo username<input name="username" type="text" autocomplete="username" required minlength="3" maxlength="50" pattern="[a-zA-Z0-9._-]+" /></label><label>Nuova password<input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="256" /></label><label>Ripeti nuova password<input name="repeat" type="password" autocomplete="new-password" required minlength="8" /></label><button type="submit">Aggiorna credenziali</button><p id="credentials-error" role="alert"></p></form></dialog>
       <dialog id="conferma" aria-labelledby="conferma-title"><div class="section-head"><h2 id="conferma-title">Conferma</h2><button data-close="conferma" class="close-dialog" aria-label="Annulla" type="button">×</button></div><p id="conferma-message"></p><div id="conferma-actions" class="actions"></div></dialog>
       <noscript>Il prototipo richiede JavaScript per gestire i contenuti locali.</noscript>
     </> : <main><h1>Prototipo amministrativo disattivato</h1><p>Disponibile solo in sviluppo locale. Questa pagina non offre accesso amministrativo.</p><a href="/">Torna al sito</a></main>}
-    <script>import './admin';</script>
+    <script>
+      // L'ordine conta: anteprima.ts sostituisce la rete prima che admin.ts
+      // la usi. In sviluppo anteprima.ts non fa nulla.
+      import './anteprima';
+      import './admin';
+    </script>
   </body>
 </html>
