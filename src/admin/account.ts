@@ -8,17 +8,26 @@
  * Parla con tre rotte, che online sono servite da `anteprima.ts` con dati
  * finti e un domani saranno servite davvero:
  *   GET    /__admin/account            elenco di chi ha accesso
- *   POST   /__admin/account/invita     { email }
+ *   POST   /__admin/account/invita     { email, ruolo }
+ *   POST   /__admin/account/ruolo      { email, ruolo }
  *   POST   /__admin/account/revoca     { email }
  */
 export {};
 
+type Ruolo = 'proprietario' | 'redattore' | 'bozze';
+
 interface Account {
   email: string;
-  ruolo: 'proprietario' | 'collaboratore';
+  ruolo: Ruolo;
   stato: 'attivo' | 'invitato';
   dal: string;
 }
+
+const ETICHETTE: Record<Ruolo, string> = {
+  proprietario: 'proprietario',
+  redattore: 'scrive e pubblica',
+  bozze: 'scrive, non pubblica',
+};
 
 const apri = document.getElementById('apri-account');
 if (apri) avvia(apri);
@@ -68,11 +77,42 @@ function avvia(apri: HTMLElement): void {
         riga.append(attesa);
       }
 
-      const ruolo = document.createElement('span');
-      ruolo.className = 'ruolo';
-      ruolo.textContent =
-        voce.ruolo === 'proprietario' ? 'proprietario' : `dal ${data(voce.dal)}`;
-      riga.append(ruolo);
+      if (voce.ruolo === 'proprietario') {
+        const ruolo = document.createElement('span');
+        ruolo.className = 'ruolo';
+        ruolo.textContent = ETICHETTE.proprietario;
+        riga.append(ruolo);
+      } else {
+        // I poteri si cambiano senza riaprire niente: il proprietario li
+        // sceglie all'invito e li corregge qui quando cambiano le esigenze.
+        const scelta = document.createElement('select');
+        scelta.setAttribute('aria-label', `Poteri di ${voce.email}`);
+        for (const valore of ['redattore', 'bozze'] as const) {
+          const opzione = document.createElement('option');
+          opzione.value = valore;
+          opzione.textContent = ETICHETTE[valore];
+          opzione.selected = voce.ruolo === valore;
+          scelta.append(opzione);
+        }
+        scelta.onchange = async () => {
+          scelta.disabled = true;
+          try {
+            await chiedi('/ruolo', { email: voce.email, ruolo: scelta.value });
+            esito!.textContent = `${voce.email}: ora ${ETICHETTE[scelta.value as Ruolo]}.`;
+            errore!.textContent = '';
+          } catch (motivo) {
+            errore!.textContent = (motivo as Error).message;
+          } finally {
+            scelta.disabled = false;
+          }
+        };
+        riga.append(scelta);
+
+        const quando = document.createElement('span');
+        quando.className = 'ruolo';
+        quando.textContent = `dal ${data(voce.dal)}`;
+        riga.append(quando);
+      }
 
       // Il proprietario non si revoca: è l'unico modo di non restare fuori.
       if (voce.ruolo !== 'proprietario') {
@@ -132,12 +172,14 @@ function avvia(apri: HTMLElement): void {
   modulo.onsubmit = async (evento) => {
     evento.preventDefault();
     const bottone = modulo.querySelector('button')!;
-    const email = String(new FormData(modulo).get('email') ?? '').trim();
+    const campi = new FormData(modulo);
+    const email = String(campi.get('email') ?? '').trim();
+    const ruolo = String(campi.get('ruolo') ?? 'redattore');
     bottone.disabled = true;
     errore.textContent = '';
     esito.textContent = '';
     try {
-      await chiedi('/invita', { email });
+      await chiedi('/invita', { email, ruolo });
       esito.textContent = `Invito inviato a ${email}. Sceglierà la password dal collegamento ricevuto.`;
       modulo.reset();
       await aggiorna();

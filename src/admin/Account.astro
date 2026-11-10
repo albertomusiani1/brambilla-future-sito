@@ -24,8 +24,14 @@
   </div>
 
   <p class="account-nota">
-    Chi invii potrà scrivere e pubblicare i contenuti. Solo tu puoi invitare e revocare.
+    Scegli che cosa può fare chi inviti. Solo il proprietario può invitare, cambiare i
+    poteri e revocare.
   </p>
+
+  <dl class="account-poteri">
+    <dt>Redattore</dt><dd>scrive, modifica e <strong>pubblica</strong> sul sito</dd>
+    <dt>Bozze</dt><dd>scrive e modifica, ma <strong>non pubblica</strong>: pubblichi tu</dd>
+  </dl>
 
   <ul id="account-elenco" class="account-elenco"></ul>
 
@@ -33,6 +39,13 @@
     <label>
       Invita un indirizzo email
       <input name="email" type="email" required autocomplete="off" placeholder="nome@azienda.it" />
+    </label>
+    <label>
+      Che cosa potrà fare
+      <select name="ruolo">
+        <option value="redattore">Redattore · scrive e pubblica</option>
+        <option value="bozze">Bozze · scrive, non pubblica</option>
+      </select>
     </label>
     <button type="submit">Invita</button>
     <p id="account-errore" role="alert"></p>

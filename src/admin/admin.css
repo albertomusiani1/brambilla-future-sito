@@ -31,3 +31,7 @@
 .account-elenco .ruolo { font-size: 0.75rem; opacity: 0.7; white-space: nowrap; }
 .account-elenco .attesa { font-size: 0.75rem; color: #f3d79a; white-space: nowrap; }
 .account-elenco button { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+.account-poteri { margin: 0 0 1.25rem; font-size: 0.82rem; display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.8rem; }
+.account-poteri dt { font-weight: 600; }
+.account-poteri dd { margin: 0; opacity: 0.8; }
+.account-elenco select { padding: 0.25rem 0.4rem; font-size: 0.78rem; }

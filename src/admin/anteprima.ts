@@ -31,9 +31,11 @@ export {};
 
 if (!import.meta.env.DEV) installa();
 
+type Ruolo = 'proprietario' | 'redattore' | 'bozze';
+
 interface Account {
   email: string;
-  ruolo: 'proprietario' | 'collaboratore';
+  ruolo: Ruolo;
   stato: 'attivo' | 'invitato';
   dal: string;
 }
@@ -191,8 +193,9 @@ function installa(): void {
 
       if (percorso === '/__admin/account') return json({ account: archivio.account });
 
-      const dati = JSON.parse(String(corpo ?? '{}')) as { email?: string };
+      const dati = JSON.parse(String(corpo ?? '{}')) as { email?: string; ruolo?: string };
       const email = (dati.email ?? '').trim().toLowerCase();
+      const ruolo: Ruolo = dati.ruolo === 'bozze' ? 'bozze' : 'redattore';
 
       if (percorso === '/__admin/account/invita') {
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -201,12 +204,18 @@ function installa(): void {
         if (archivio.account.some((a) => a.email.toLowerCase() === email)) {
           return json({ error: 'Questo indirizzo ha già accesso.' }, 409);
         }
-        archivio.account.push({
-          email,
-          ruolo: 'collaboratore',
-          stato: 'invitato',
-          dal: new Date().toISOString(),
-        });
+        archivio.account.push({ email, ruolo, stato: 'invitato', dal: new Date().toISOString() });
+        scrivi(archivio);
+        return json({ account: archivio.account });
+      }
+
+      if (percorso === '/__admin/account/ruolo') {
+        const voce = archivio.account.find((a) => a.email.toLowerCase() === email);
+        if (!voce) return json({ error: 'Questo indirizzo non ha accesso.' }, 404);
+        if (voce.ruolo === 'proprietario') {
+          return json({ error: 'I poteri del proprietario non si cambiano.' }, 400);
+        }
+        voce.ruolo = ruolo;
         scrivi(archivio);
         return json({ account: archivio.account });
       }
