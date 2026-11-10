@@ -1,0 +1,41 @@
+---
+/**
+ * Impostazioni → Account: chi può entrare nel pannello.
+ *
+ * Il proprietario invita un indirizzo email; a quell'indirizzo arriva un
+ * messaggio con un collegamento, e la persona **sceglie da sé la propria
+ * password**. Nessuno vede né imposta la password di un altro.
+ *
+ * Tre regole, scritte qui perché si vedano:
+ *  · chi è invitato può lavorare sui contenuti, non può invitare né revocare;
+ *  · il proprietario non può revocare sé stesso, per non chiudersi fuori;
+ *  · revocare è immediato e toglie l'accesso anche a chi è già entrato.
+ *
+ * Questo file è solo la finestra. Il comportamento sta in `account.ts`, e
+ * online — dove non c'è un server — risponde `anteprima.ts` con dati finti,
+ * così il giro si può guardare prima di costruirlo davvero.
+ */
+---
+
+<dialog id="account" aria-labelledby="account-title">
+  <div class="section-head">
+    <h2 id="account-title">Account</h2>
+    <button data-close="account" class="close-dialog" aria-label="Chiudi account" type="button">×</button>
+  </div>
+
+  <p class="account-nota">
+    Chi invii potrà scrivere e pubblicare i contenuti. Solo tu puoi invitare e revocare.
+  </p>
+
+  <ul id="account-elenco" class="account-elenco"></ul>
+
+  <form id="account-invito">
+    <label>
+      Invita un indirizzo email
+      <input name="email" type="email" required autocomplete="off" placeholder="nome@azienda.it" />
+    </label>
+    <button type="submit">Invita</button>
+    <p id="account-errore" role="alert"></p>
+    <p id="account-esito" role="status" aria-live="polite"></p>
+  </form>
+</dialog>

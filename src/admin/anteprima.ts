@@ -31,12 +31,20 @@ export {};
 
 if (!import.meta.env.DEV) installa();
 
+interface Account {
+  email: string;
+  ruolo: 'proprietario' | 'collaboratore';
+  stato: 'attivo' | 'invitato';
+  dal: string;
+}
+
 interface Archivio {
   revisione: number;
   stato: unknown;
   partenza: unknown;
   username: string;
   dentro: boolean;
+  account?: Account[];
 }
 
 function installa(): void {
@@ -161,6 +169,58 @@ function installa(): void {
         dati.action === 'reset' ? structuredClone(archivio.partenza) : (dati.state ?? archivio.stato);
       scrivi(archivio);
       return rispostaSito(archivio);
+    }
+
+    // --- account ---------------------------------------------------------
+    if (percorso.startsWith('/__admin/account')) {
+      /**
+       * Il proprietario di partenza è l'indirizzo dell'azienda, quello già
+       * pubblicato sul sito: nell'anteprima non si inventano persone.
+       */
+      if (!archivio.account) {
+        archivio.account = [
+          {
+            email: 'service.projectune@gmail.com',
+            ruolo: 'proprietario',
+            stato: 'attivo',
+            dal: new Date().toISOString(),
+          },
+        ];
+        scrivi(archivio);
+      }
+
+      if (percorso === '/__admin/account') return json({ account: archivio.account });
+
+      const dati = JSON.parse(String(corpo ?? '{}')) as { email?: string };
+      const email = (dati.email ?? '').trim().toLowerCase();
+
+      if (percorso === '/__admin/account/invita') {
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+          return json({ error: 'Indirizzo email non valido.' }, 400);
+        }
+        if (archivio.account.some((a) => a.email.toLowerCase() === email)) {
+          return json({ error: 'Questo indirizzo ha già accesso.' }, 409);
+        }
+        archivio.account.push({
+          email,
+          ruolo: 'collaboratore',
+          stato: 'invitato',
+          dal: new Date().toISOString(),
+        });
+        scrivi(archivio);
+        return json({ account: archivio.account });
+      }
+
+      if (percorso === '/__admin/account/revoca') {
+        const voce = archivio.account.find((a) => a.email.toLowerCase() === email);
+        if (!voce) return json({ error: 'Questo indirizzo non ha accesso.' }, 404);
+        if (voce.ruolo === 'proprietario') {
+          return json({ error: 'Il proprietario non può revocare sé stesso.' }, 400);
+        }
+        archivio.account = archivio.account.filter((a) => a !== voce);
+        scrivi(archivio);
+        return json({ account: archivio.account });
+      }
     }
 
     // --- immagini --------------------------------------------------------

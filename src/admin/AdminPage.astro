@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import { committenti } from '../lib/committenti';
 import { CATEGORIE_PROGETTO } from '../lib/schema-progetto';
+import Account from './Account.astro';
 import './admin.css';
 const { pagina = 'dashboard' } = Astro.props;
 /**
@@ -35,7 +36,7 @@ const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] 
           <a href="/admin/progetti" aria-current={pagina === 'progetti' ? 'page' : undefined}>02 Progetti e committenti</a>
         </nav>
         <a href="/">↗ Apri il sito pubblico</a>
-        <button id="apri-credenziali" class="secondary" type="button">Credenziali di accesso</button><button id="logout" class="secondary" type="button">Esci</button>
+        <button id="apri-account" class="secondary" type="button">Account</button><button id="apri-credenziali" class="secondary" type="button">Credenziali di accesso</button><button id="logout" class="secondary" type="button">Esci</button>
         <button id="reset-sito" class="secondary" type="button">Ripristina sito dopo le prove</button>
       </aside>
       <main id="workspace">
@@ -97,6 +98,7 @@ const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] 
         <div id="admin-seed" data-seed={seed} hidden></div>
       </>}
       <dialog id="credenziali" aria-labelledby="credenziali-title"><div class="section-head"><h2 id="credenziali-title">Credenziali di accesso</h2><button data-close="credenziali" class="close-dialog" aria-label="Chiudi credenziali" type="button">×</button></div><form id="credentials-form"><label>Password attuale<input name="currentPassword" type="password" autocomplete="current-password" required /></label><label>Nuovo username<input name="username" type="text" autocomplete="username" required minlength="3" maxlength="50" pattern="[a-zA-Z0-9._-]+" /></label><label>Nuova password<input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="256" /></label><label>Ripeti nuova password<input name="repeat" type="password" autocomplete="new-password" required minlength="8" /></label><button type="submit">Aggiorna credenziali</button><p id="credentials-error" role="alert"></p></form></dialog>
+      <Account />
       <dialog id="conferma" aria-labelledby="conferma-title"><div class="section-head"><h2 id="conferma-title">Conferma</h2><button data-close="conferma" class="close-dialog" aria-label="Annulla" type="button">×</button></div><p id="conferma-message"></p><div id="conferma-actions" class="actions"></div></dialog>
       <noscript>Il prototipo richiede JavaScript per gestire i contenuti locali.</noscript>
     </> : <main><h1>Prototipo amministrativo disattivato</h1><p>Disponibile solo in sviluppo locale. Questa pagina non offre accesso amministrativo.</p><a href="/">Torna al sito</a></main>}
@@ -105,6 +107,7 @@ const seed = JSON.stringify({ progetti, committenti: enabled ? committenti : [] 
       // la usi. In sviluppo anteprima.ts non fa nulla.
       import './anteprima';
       import './admin';
+      import './account';
     </script>
   </body>
 </html>
